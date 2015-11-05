@@ -6,7 +6,9 @@
   "license": "./LICENSE",
   "author": "HomeOffice",
   "scripts": {
-    "test": "NODE_ENV=test mocha"
+    "test": "NODE_ENV=test mocha",
+    "lint": "eslint .",
+    "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
     "hof": "0.0.1",
@@ -30,5 +32,10 @@
     "sinomocha": "^0.2.4",
     "sinon": "^1.15.3",
     "sinon-chai": "^2.8.0"
-  }
+  },
+  "pre-commit": [
+    "lint",
+    "style",
+    "test"
+  ]
 }
