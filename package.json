@@ -1,0 +1,34 @@
+{
+  "name": "hof-controllers",
+  "version": "0.0.1",
+  "description": "A collection of controllers commonly used in HOF",
+  "main": "index.js",
+  "license": "./LICENSE",
+  "author": "HomeOffice",
+  "scripts": {
+    "test": "NODE_ENV=test mocha"
+  },
+  "dependencies": {
+    "hof": "0.0.1",
+    "moment": "^2.10.3",
+    "moment-business": "^2.0.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "debug": "^2.2.0",
+    "eslint": "^0.23.0",
+    "eslint-plugin-filenames": "^0.1.1",
+    "eslint-plugin-mocha": "^0.2.2",
+    "eslint-plugin-one-variable-per-var": "0.0.3",
+    "jscs": "^1.13.1",
+    "mocha": "^2.2.5",
+    "mocha-junit-reporter": "^1.4.0",
+    "mocha-multi": "^0.7.1",
+    "pre-commit": "^1.0.10",
+    "proxyquire": "^1.5.0",
+    "sinomocha": "^0.2.4",
+    "sinon": "^1.15.3",
+    "sinon-chai": "^2.8.0"
+  }
+}
