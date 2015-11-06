@@ -1,9 +1,9 @@
 {
   "name": "hof-controllers",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A collection of controllers commonly used in HOF",
   "main": "index.js",
-  "license": "./LICENSE",
+  "license": "GPLv2",
   "author": "HomeOffice",
   "scripts": {
     "test": "NODE_ENV=test mocha",
