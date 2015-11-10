@@ -1,4 +1,4 @@
-# hof-controllers [![npm version](https://badge.fury.io/js/hof-controllers.svg)](https://badge.fury.io/js/hof-controllers)
+# hof-controllers [![npm version](https://badge.fury.io/js/hof-controllers.svg)](https://badge.fury.io/js/hof-controllers) [![Build Status](https://travis-ci.org/UKHomeOffice/hof-controllers.svg)](https://travis-ci.org/UKHomeOffice/hof-controllers)
 
 A collection of controllers extended from [HOF](https://github.com/UKHomeOffice/hof) Wizard, Form Controller:
 ```js
