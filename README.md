@@ -1,4 +1,4 @@
-# hof-controllers
+# hof-controllers [![npm version](https://badge.fury.io/js/hof-controllers.svg)](https://badge.fury.io/js/hof-controllers)
 
 A collection of controllers extended from [HOF](https://github.com/UKHomeOffice/hof) Wizard, Form Controller:
 ```js
@@ -106,6 +106,10 @@ MyController.prototype.validateField = function validateField(keyToValidate, req
 - Adds a 'pretty' formatted (`D MMMM YYYY`) date to the form values.
 
 ------------------------------
+
+### Error Controller
+
+A simple wrapper around `require('hof').wizard.Error;` to make it easier to extend and customise error behaviour on error.
 
 ### Extending
 
