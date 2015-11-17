@@ -4,27 +4,27 @@ var proxyquire = require('proxyquire');
 
 describe('lib/base-controller', function () {
 
-  var hof;
+  var hmpoFormWizard;
   var Controller;
   var controller;
 
   beforeEach(function () {
-    hof = require('hof');
+    hmpoFormWizard = require('hmpo-form-wizard');
   });
 
   describe('constructor', function () {
 
     beforeEach(function () {
-      hof.wizard.Controller = sinon.stub();
-      hof.wizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
+      hmpoFormWizard.Controller = sinon.stub();
+      hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
-        'hof': hof
+        'hmpo-form-wizard': hmpoFormWizard
       });
     });
 
     it('calls the parent constructor', function () {
       controller = new Controller({template: 'foo'});
-      hof.wizard.Controller.should.have.been.called;
+      hmpoFormWizard.Controller.should.have.been.called;
     });
 
   });
@@ -32,9 +32,9 @@ describe('lib/base-controller', function () {
   describe('methods', function () {
 
     beforeEach(function () {
-      hof.wizard.Controller.prototype.getNextStep = sinon.stub();
+      hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
       Controller = proxyquire('../../lib/base-controller', {
-        'hof': hof
+        'hmpo-form': hmpoFormWizard
       });
     });
 
@@ -81,7 +81,7 @@ describe('lib/base-controller', function () {
       var callback;
 
       beforeEach(function () {
-        hof.wizard.Controller.prototype.getValues = sinon.stub();
+        hmpoFormWizard.Controller.prototype.getValues = sinon.stub();
         Controller.prototype.getErrors = sinon.stub();
         req = {
           sessionModel: {
@@ -160,7 +160,7 @@ describe('lib/base-controller', function () {
         controller = new Controller({template: 'foo'});
         controller.options = {};
         controller.getValues(req, res, callback);
-        hof.wizard.Controller.prototype.getValues
+        hmpoFormWizard.Controller.prototype.getValues
           .should.always.have.been.calledWithExactly(req, res, callback);
       });
 
@@ -170,7 +170,7 @@ describe('lib/base-controller', function () {
       var req = {};
 
       beforeEach(function () {
-        hof.wizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
+        hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
         req.params = {};
         req.baseUrl = '';
         controller = new Controller({template: 'foo'});
@@ -200,7 +200,7 @@ describe('lib/base-controller', function () {
       var err = {};
 
       beforeEach(function () {
-        hof.wizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
+        hmpoFormWizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
         req.params = {};
         controller = new Controller({template: 'foo'});
       });
