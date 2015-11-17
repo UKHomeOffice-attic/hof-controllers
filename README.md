@@ -1,8 +1,8 @@
 # hof-controllers [![npm version](https://badge.fury.io/js/hof-controllers.svg)](https://badge.fury.io/js/hof-controllers) [![Build Status](https://travis-ci.org/UKHomeOffice/hof-controllers.svg)](https://travis-ci.org/UKHomeOffice/hof-controllers)
 
-A collection of controllers extended from [HOF](https://github.com/UKHomeOffice/hof) Wizard, Form Controller:
+A collection of controllers extended from [passports-form-wizard](https://github.com/UKHomeOffice/passports-form-wizard) Wizard, Form Controller:
 ```js
-require('hof').wizard.Controller
+require('hmpo-form-wizard').Controller
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ Accessed as `base` from `hof-controllers`
 var baseController = require('hof-controllers').base;
 ```
 
-Extends from [HOF](https://github.com/UKHomeOffice/hof) Wizard, Form Controller.
+Extends from [passports-form-wizard](https://github.com/UKHomeOffice/passports-form-wizard) Wizard, Form Controller.
 
 #### Added functionality for clearing sessions
 
@@ -109,7 +109,7 @@ MyController.prototype.validateField = function validateField(keyToValidate, req
 
 ### Error Controller
 
-A simple wrapper around `require('hof').wizard.Error;` to make it easier to extend and customise error behaviour on error.
+A simple wrapper around `require('hmpo-form-wizard').Error;` to make it easier to extend and customise error behaviour on error.
 
 ### Extending
 
