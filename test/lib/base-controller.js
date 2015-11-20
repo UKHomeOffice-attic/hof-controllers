@@ -193,6 +193,161 @@ describe('lib/base-controller', function () {
         });
       });
 
+      describe('with a fork', function () {
+
+        beforeEach(function () {
+          req.form = {values: {}};
+        });
+
+        describe('when the condition config is met', function () {
+
+          it('the next step is the fork target', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: {
+                field: 'example-radio',
+                value: 'superman'
+              }
+            }];
+            controller.getNextStep(req, {}).should.contain('/target-page');
+          });
+        });
+
+        describe('when the condition config is not met', function () {
+          it('the next step is the original next target', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: {
+                field: 'example-radio',
+                value: 'lex luther'
+              }
+            }];
+            controller.getNextStep(req, {}).should.contain('/');
+          });
+        });
+
+        describe('when the condition function is met', function () {
+          it('the next step is the fork target', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.getNextStep(req, {}).should.contain('/target-page');
+          });
+        });
+
+        describe('when the condition function is not met', function () {
+
+          it('the next step is the origin next target', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'batman';
+              }
+            }];
+            controller.getNextStep(req, {}).should.contain('/');
+          });
+        });
+
+        describe('when the action is "edit"', function () {
+          it('appends "edit" to the path', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = true;
+            req.params.action = 'edit';
+            controller.getNextStep(req).should.contain('/edit');
+          });
+        });
+
+      });
+
+      describe('with more than one fork', function () {
+
+        describe('when the fields are the same', function () {
+
+          beforeEach(function () {
+            req.form = {values: {
+              'example-radio': 'superman'
+            }};
+            controller.options.forks = [{
+              target: '/superman-page',
+              condition: {
+                field: 'example-radio',
+                value: 'superman'
+              }
+            }, {
+              target: '/batman-page',
+              condition: {
+                field: 'example-radio',
+                value: 'superman'
+              }
+            }];
+          });
+
+          describe('and each condition is met', function () {
+            it('the last forks\' target becomes the next step', function () {
+              controller.getNextStep(req, {}).should.contain('/batman-page');
+            });
+          });
+
+        });
+
+        describe('when the fields are different', function () {
+
+          beforeEach(function () {
+            controller.options.forks = [{
+              target: '/superman-page',
+              condition: {
+                field: 'example-radio',
+                value: 'superman'
+              }
+            }, {
+              target: '/smallville-page',
+              condition: {
+                field: 'example-email',
+                value: 'clarke@smallville.com'
+              }
+            }];
+          });
+
+          describe('and each condition is met', function () {
+            beforeEach(function () {
+              req.form = {values: {
+                'example-radio': 'superman',
+                'example-email': 'clarke@smallville.com'
+              }};
+            });
+            it('the last forks\' target becomes the next step', function () {
+              controller.getNextStep(req, {}).should.contain('/smallville-page');
+            });
+          });
+
+          describe('and the first condition is met', function () {
+            beforeEach(function () {
+              req.form = {values: {
+                'example-radio': 'superman',
+                'example-email': 'kent@smallville.com'
+              }};
+            });
+            it('the first forks\' target becomes the next step', function () {
+              controller.getNextStep(req, {}).should.contain('/superman-page');
+            });
+          });
+
+        });
+      });
+
     });
 
     describe('.getErrorStep()', function () {
