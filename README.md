@@ -61,7 +61,8 @@ Adds `single` or `multiple` to the locals to describe the number of errors for p
 
 ### Date Controller
 
-Accessed as `date` from `hof-controllers`
+Accessed as `
+` from `hof-controllers`
 
 ```js
 var dateController = require('hof-controllers').date;
@@ -77,11 +78,11 @@ Extends from `require('hof-controllers').base;`
 
 - What the validators the date validates against can be overridden with the `validate` property on the date key field.
 
-In this example, the whole date will only validate if it contains non-numeric characters.
+In this example, the `'my-date'` fields will only validate if they contain non-numeric characters.
 
 ```js
 {
-  date: {
+  'my-date': {
     validate: ['numeric']
   }
 }
@@ -115,8 +116,12 @@ A simple wrapper around `require('hmpo-form-wizard').Error;` to make it easier t
 
 To extend the functionality of a controller call the parent constructor and use node `util` to inherit the prototype;
 
+`this.dateKey` is the value of the date field that the controller will process. The value of the `this.dateKey` must match the name of the date field.
+[Read more about date fields](https://github.com/UKHomeOffice/hof/blob/master/documentation/fields.md#date-fields)
+
 ```js
 var DateController = function DateController() {
+  this.dateKey = 'my-date';
   Controller.apply(this, arguments);
 };
 
