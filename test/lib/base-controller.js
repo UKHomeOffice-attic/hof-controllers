@@ -34,7 +34,7 @@ describe('lib/base-controller', function () {
     beforeEach(function () {
       hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form': hmpoFormWizard
+        'hmpo-form-wizard': hmpoFormWizard
       });
     });
 
@@ -197,6 +197,7 @@ describe('lib/base-controller', function () {
 
         beforeEach(function () {
           req.form = {values: {}};
+          hmpoFormWizard.Controller.prototype.getNextStep.returns('/next-page');
         });
 
         describe('when the condition config is met', function () {
@@ -224,7 +225,7 @@ describe('lib/base-controller', function () {
                 value: 'lex luther'
               }
             }];
-            controller.getNextStep(req, {}).should.contain('/');
+            controller.getNextStep(req, {}).should.equal('/next-page');
           });
         });
 
@@ -251,7 +252,7 @@ describe('lib/base-controller', function () {
                 return request.form.values['example-radio'] === 'batman';
               }
             }];
-            controller.getNextStep(req, {}).should.contain('/');
+            controller.getNextStep(req, {}).should.equal('/next-page');
           });
         });
 

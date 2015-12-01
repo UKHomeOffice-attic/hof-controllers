@@ -1,6 +1,6 @@
 {
   "name": "hof-controllers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A collection of controllers commonly used in HOF",
   "main": "index.js",
   "license": "GPLv2",
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "hmpo-form-wizard": "^3.2.0",
+    "lodash": "^3.10.1",
     "moment": "^2.10.3",
-    "moment-business": "^2.0.0",
-    "underscore": "^1.8.3"
+    "moment-business": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.0.0",
