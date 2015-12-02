@@ -16,7 +16,7 @@ var controllers = require('hof-controllers');
 Accessed as `base` from `hof-controllers`
 
 ```js
-var baseController = require('hof-controllers').base;
+var BaseController = require('hof-controllers').base;
 ```
 
 Extends from [passports-form-wizard](https://github.com/UKHomeOffice/passports-form-wizard) Wizard, Form Controller.
@@ -126,11 +126,10 @@ In this example, if the last condition resolves to true - even if the others als
 
 ### Date Controller
 
-Accessed as `
-` from `hof-controllers`
+Accessed as `date` from `hof-controllers`
 
 ```js
-var dateController = require('hof-controllers').date;
+var DateController = require('hof-controllers').date;
 ```
 
 Extends from `require('hof-controllers').base;`
@@ -175,6 +174,8 @@ MyController.prototype.validateField = function validateField(keyToValidate, req
 
 ### Error Controller
 
+Accessed as `error` from `hof-controllers`
+
 A simple wrapper around `require('hmpo-form-wizard').Error;` to make it easier to extend and customise error behaviour on error.
 
 ### Extending
@@ -193,6 +194,37 @@ var DateController = function DateController() {
 util.inherits(DateController, Controller);
 ```
 ------------------------------
+
+### Typeahead Controller
+
+Accessed as `typeahead` from `hof-controllers`
+
+```js
+var Typeahead = require('hof-controllers').typeahead;
+```
+
+Extends from `require('hof-controllers').base;`
+
+#### Typeahead validation
+
+To use add a key of `typeahead` on the field you want to validate like so:
+
+```
+fields: {
+  country: {
+    typeahead: {
+      list: ['England', 'France', 'Poland']
+    }
+  }
+}
+```
+
+Where `list` is a typeahead list you want to validate against. In practice this can be `required('./assets/countrylist')` in.
+
+The controller will also skip validation if you add a dependency and the criteria isn't met (ala normal field validation).
+
+Calls the parent `validateField` if the field does not have a typeahead field.
+
 
 ## Test
 
