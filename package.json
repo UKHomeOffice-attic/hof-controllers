@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "A collection of controllers commonly used in HOF",
   "main": "index.js",
-  "license": "GPLv2",
+  "license": "GPL-2.0",
   "bugs": {
     "url": "https://github.com/UKHomeOffice/hof-controllers/issues"
   },
