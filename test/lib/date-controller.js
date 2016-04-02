@@ -259,19 +259,19 @@ describe('lib/date-controller', function () {
 
   describe('format', function () {
     var callback;
-      var req = {
-        form: {
-          values: {}
-        }
-      };
-      
-     beforeEach(function () {
-        callback = sinon.stub();
-        controller = new DateController({template: 'index'});
-        controller.dateKey = 'date';
-        controller.options = {};
-        controller.process(req, {}, callback);
-      });
+    var req = {
+      form: {
+        values: {}
+      }
+    };
+
+   beforeEach(function () {
+      callback = sinon.stub();
+      controller = new DateController({template: 'index'});
+      controller.dateKey = 'date';
+      controller.options = {};
+      controller.process(req, {}, callback);
+    });
 
     it('formats the date property to GDS style date if no prettyDate option passed in', function () {
       req.form.values['date-day'] = '01';
@@ -300,8 +300,7 @@ describe('lib/date-controller', function () {
     });
 
     it('takes a custom date format if the dateFormat option passed in', function () {
-      var res = {};
-      var callback = sinon.stub();
+      callback = sinon.stub();
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
       req.form.values['date-year'] = '1982';
