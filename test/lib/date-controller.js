@@ -258,24 +258,56 @@ describe('lib/date-controller', function () {
   });
 
   describe('format', function () {
+    var callback;
     var req = {
       form: {
         values: {}
       }
     };
-    beforeEach(function () {
+
+   beforeEach(function () {
+      callback = sinon.stub();
       controller = new DateController({template: 'index'});
       controller.dateKey = 'date';
+      controller.options = {};
+      controller.process(req, {}, callback);
     });
 
-    it('formats the date property to GDS style date', function () {
+    it('formats the date property to GDS style date if no prettyDate option passed in', function () {
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
       req.form.values['date-year'] = '1982';
 
       controller.format(req);
-
       req.form.values['date-formatted'].should.equal('1 November 1982');
+    });
+
+    it('takes a custom date style date if prettyDate option passed in', function () {
+      req.form.values['date-day'] = '01';
+      req.form.values['date-month'] = '11';
+      req.form.values['date-year'] = '1982';
+      controller.options.prettyDate = 'D/MMMM/YYYY';
+
+      controller.format(req);
+      req.form.values['date-formatted'].should.equal('1/November/1982');
+    });
+
+    it('sets dataFormat to DD-MM-YYYY if no dateFormat option passed in', function() {
+      req.form.values['date-day'] = '01';
+      req.form.values['date-month'] = '11';
+      req.form.values['date-year'] = '1982';
+      req.form.values.date.should.equal('01-11-1982');
+    });
+
+    it('takes a custom date format if the dateFormat option passed in', function () {
+      callback = sinon.stub();
+      req.form.values['date-day'] = '01';
+      req.form.values['date-month'] = '11';
+      req.form.values['date-year'] = '1982';
+      controller.options.dateFormat = 'YYYY MM DD';
+
+      controller.process(req, {}, callback);
+      req.form.values.date.should.equal('1982 11 01');
     });
   });
 
