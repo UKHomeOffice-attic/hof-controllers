@@ -59,6 +59,26 @@ Or override in step options
 
 Adds `single` or `multiple` to the locals to describe the number of errors for pluralisation of error messages.
 
+#### Exposes meta to templates
+
+Add a locals object to step config to expose configurable key/value pairs in the template. Useful for generating template partials programmatically. These will override any locals provided further up the tree.
+
+Steps config
+```js
+'/step-name': {
+  locals: {
+    pageTitle: 'Page Title'
+    foo: 'bar'
+  }
+}
+```
+
+Template
+```html
+<h1>{{pageTitle}}</h1>
+<div class="{{foo}}"></div>
+```
+
 #### Handles journey forking
 
 Each step definition accepts a `next` property, the value of which is the next route in the journey. By default, when the form is successfully submitted, the next steps will load. However, there are times when it is necessary to fork from the current journey based on a users response to certain questions in a form. For such circumstances there exists the `forks` property.
@@ -199,4 +219,3 @@ util.inherits(DateController, Controller);
 ```bash
 $ npm test
 ```
-
