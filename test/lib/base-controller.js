@@ -1,21 +1,21 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire');
 
-describe('lib/base-controller', function () {
+describe('lib/base-controller', () => {
 
-  var hmpoFormWizard;
-  var Controller;
-  var controller;
+  let hmpoFormWizard;
+  let Controller;
+  let controller;
 
-  beforeEach(function () {
+  beforeEach(() => {
     hmpoFormWizard = require('hmpo-form-wizard');
   });
 
-  describe('constructor', function () {
+  describe('constructor', () => {
 
-    beforeEach(function () {
-      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function() {
+    beforeEach(() => {
+      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function () {
         this.options = {};
       });
       hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
@@ -25,41 +25,41 @@ describe('lib/base-controller', function () {
       });
     });
 
-    it('calls the parent constructor', function () {
+    it('calls the parent constructor', () => {
       controller = new Controller({template: 'foo'});
       hmpoFormWizard.Controller.should.have.been.called;
     });
 
   });
 
-  describe('methods', function () {
+  describe('methods', () => {
 
-    beforeEach(function () {
+    beforeEach(() => {
       hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
       Controller = proxyquire('../../lib/base-controller', {
         'hmpo-form-wizard': hmpoFormWizard
       });
     });
 
-    describe('.locals()', function () {
+    describe('.locals()', () => {
 
-      var req = {
+      const req = {
         params: {}
       };
-      var res = {};
+      const res = {};
 
-      beforeEach(function () {
+      beforeEach(() => {
         controller = new Controller({
           template: 'foo'
         });
       });
 
-      it('always extends from parent locals', function () {
+      it('always extends from parent locals', () => {
         controller.getErrors = sinon.stub().returns({foo: true});
         controller.locals(req, res).should.have.property('foo').and.always.equal('bar');
       });
 
-      it('returns errorLength.single if there is one error', function () {
+      it('returns errorLength.single if there is one error', () => {
         controller.getErrors = sinon.stub().returns({foo: true});
         controller.locals(req, res).should.have.property('errorLength')
           .and.deep.equal({
@@ -67,7 +67,7 @@ describe('lib/base-controller', function () {
           });
       });
 
-      it('returns errorLength.multiple if there is more than one error', function () {
+      it('returns errorLength.multiple if there is more than one error', () => {
         controller.getErrors = sinon.stub().returns({bar: true, baz: true});
         controller.locals(req, res).should.have.property('errorLength')
           .and.deep.equal({
@@ -75,9 +75,9 @@ describe('lib/base-controller', function () {
           });
       });
 
-      describe('with fields', function () {
-        var locals;
-        beforeEach(function () {
+      describe('with fields', () => {
+        let locals;
+        beforeEach(() => {
           controller.getErrors = sinon.stub().returns({foo: true});
           controller.options.fields = {
             'a-field': {
@@ -90,25 +90,25 @@ describe('lib/base-controller', function () {
           locals = controller.locals(req, res);
         });
 
-        it('should have added a fields array to return object', function () {
+        it('should have added a fields array to return object', () => {
           locals.should.have.property('fields').and.be.an('array');
         });
 
-        it('should have added 2 items to the fields array', function () {
+        it('should have added 2 items to the fields array', () => {
           locals.fields.length.should.be.equal(2);
         });
 
-        it('should have added \'a-field\' as \'key\' property to the first object', function () {
+        it('should have added \'a-field\' as \'key\' property to the first object', () => {
           locals.fields[0].key.should.be.equal('a-field');
         });
 
-        it('should have added \'input-text\' as \'mixin\' property to the first object', function () {
+        it('should have added \'input-text\' as \'mixin\' property to the first object', () => {
           locals.fields[0].mixin.should.be.equal('input-text');
         });
       });
 
-      describe('with locals', function () {
-        beforeEach(function () {
+      describe('with locals', () => {
+        beforeEach(() => {
           controller.getErrors = sinon.stub().returns({foo: true});
           res.locals = {};
           res.locals.values = {
@@ -133,20 +133,20 @@ describe('lib/base-controller', function () {
           };
         });
 
-        it('should expose test in locals', function () {
+        it('should expose test in locals', () => {
           controller.locals(req, res).should.have.property('test').and.equal('bar');
         });
       });
     });
 
-    describe('.getValues()', function () {
-      var req = {
+    describe('.getValues()', () => {
+      const res = {};
+      let req = {
         params: {}
       };
-      var res = {};
-      var callback;
+      let callback;
 
-      beforeEach(function () {
+      beforeEach(() => {
         hmpoFormWizard.Controller.prototype.getValues = sinon.stub();
         Controller.prototype.getErrors = sinon.stub();
         req = {
@@ -158,9 +158,9 @@ describe('lib/base-controller', function () {
         callback = sinon.stub();
       });
 
-      describe('when there\'s a next step', function () {
+      describe('when there\'s a next step', () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
           controller = new Controller({
             template: 'foo'
           });
@@ -170,29 +170,29 @@ describe('lib/base-controller', function () {
           controller.getValues(req, res, callback);
         });
 
-        it('resets the session', function () {
+        it('resets the session', () => {
           req.sessionModel.reset.should.not.have.been.called;
         });
 
       });
 
-      describe('when there\'s no next step', function () {
+      describe('when there\'s no next step', () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
           controller = new Controller({template: 'foo'});
           controller.options = {};
           controller.getValues(req, res, callback);
         });
 
-        it('resets the session', function () {
+        it('resets the session', () => {
           req.sessionModel.reset.should.have.been.calledOnce;
         });
 
       });
 
-      describe('when there\'s no next step but clearSession is false', function () {
+      describe('when there\'s no next step but clearSession is false', () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
           controller = new Controller({template: 'foo'});
           controller.options = {
             clearSession: false
@@ -200,15 +200,15 @@ describe('lib/base-controller', function () {
           controller.getValues(req, res, callback);
         });
 
-        it('resets the session', function () {
+        it('resets the session', () => {
           req.sessionModel.reset.should.not.have.been.calledOnce;
         });
 
       });
 
-      describe('when clearSession is set', function () {
+      describe('when clearSession is set', () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
           controller = new Controller({template: 'foo'});
           controller.options = {
             clearSession: true
@@ -216,13 +216,13 @@ describe('lib/base-controller', function () {
           controller.getValues(req, res, callback);
         });
 
-        it('resets the session', function () {
+        it('resets the session', () => {
           req.sessionModel.reset.should.have.been.calledOnce;
         });
 
       });
 
-      it('always calls the parent controller getValues', function () {
+      it('always calls the parent controller getValues', () => {
         controller = new Controller({template: 'foo'});
         controller.options = {};
         controller.getValues(req, res, callback);
@@ -232,11 +232,11 @@ describe('lib/base-controller', function () {
 
     });
 
-    describe('.getNextStep()', function () {
-      var req = {};
-      var getStub;
+    describe('.getNextStep()', () => {
+      const req = {};
+      let getStub;
 
-      beforeEach(function () {
+      beforeEach(() => {
         getStub = sinon.stub();
         getStub.returns(['/']);
         hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
@@ -250,24 +250,24 @@ describe('lib/base-controller', function () {
         controller.options = {};
       });
 
-      describe('when the action is "edit"', function () {
-        it('appends "edit" to the path', function () {
+      describe('when the action is "edit"', () => {
+        it('appends "edit" to the path', () => {
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
           controller.getNextStep(req).should.contain('/edit');
         });
       });
 
-      describe('when the action is "edit" and continueOnEdit option is falsey', function () {
-        it('appends "confirm" to the path', function () {
+      describe('when the action is "edit" and continueOnEdit option is falsey', () => {
+        it('appends "confirm" to the path', () => {
           controller.options.continueOnEdit = false;
           req.params.action = 'edit';
           controller.getNextStep(req).should.contain('/confirm');
         });
       });
 
-      describe('when the action is "edit" and continueOnEdit is truthy', function () {
-        it('appends "/edit" to the path if next page is not /confirm', function () {
+      describe('when the action is "edit" and continueOnEdit is truthy', () => {
+        it('appends "/edit" to the path if next page is not /confirm', () => {
           hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
@@ -275,7 +275,7 @@ describe('lib/base-controller', function () {
           controller.getNextStep(req).should.contain('/edit');
         });
 
-        it('doesn\'t append "/edit" to the path if next page is /confirm', function () {
+        it('doesn\'t append "/edit" to the path if next page is /confirm', () => {
           hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/confirm');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
@@ -283,8 +283,8 @@ describe('lib/base-controller', function () {
         });
       });
 
-      describe('with a fork', function () {
-        beforeEach(function () {
+      describe('with a fork', () => {
+        beforeEach(() => {
           getStub = sinon.stub();
           req.sessionModel = {
             reset: sinon.stub(),
@@ -294,9 +294,9 @@ describe('lib/base-controller', function () {
           hmpoFormWizard.Controller.prototype.getNextStep.returns('/next-page');
         });
 
-        describe('when the condition config is met', function () {
+        describe('when the condition config is met', () => {
 
-          it('the next step is the fork target', function () {
+          it('the next step is the fork target', () => {
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
@@ -309,8 +309,8 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the condition config is not met', function () {
-          it('the next step is the original next target', function () {
+        describe('when the condition config is not met', () => {
+          it('the next step is the original next target', () => {
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
@@ -323,12 +323,12 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the condition function is met', function () {
-          it('the next step is the fork target', function () {
+        describe('when the condition is => met', () => {
+          it('the next step is the fork target', () => {
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -336,13 +336,13 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the condition function is not met', function () {
+        describe('when the condition is => not met', () => {
 
-          it('the next step is the origin next target', function () {
+          it('the next step is the origin next target', () => {
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'batman';
               }
             }];
@@ -350,13 +350,13 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the action is "edit" and we\'ve been down the fork', function () {
-          it('should return /confirm if baseUrl is not set', function () {
+        describe('when the action is "edit" and we\'ve been down the fork', () => {
+          it('should return /confirm if baseUrl is not set', () => {
             getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -365,12 +365,12 @@ describe('lib/base-controller', function () {
             controller.getNextStep(req).should.equal('/confirm');
           });
 
-          it('should return /a-base-url/confirm if baseUrl is set', function () {
+          it('should return /a-base-url/confirm if baseUrl is set', () => {
             getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -380,12 +380,12 @@ describe('lib/base-controller', function () {
             controller.getNextStep(req).should.equal('/a-base-url/confirm');
           });
 
-          it('should append "edit" to the path if baseUrl is set and continueOnEdit is false', function () {
+          it('should append "edit" to the path if baseUrl is set and continueOnEdit is false', () => {
             getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -396,12 +396,12 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the action is "edit" but we\'ve not been down the fork', function () {
-          it('appends "edit" to the path', function () {
+        describe('when the action is "edit" but we\'ve not been down the fork', () => {
+          it('appends "edit" to the path', () => {
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -411,13 +411,13 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the action is "edit" and we\'ve been down the standard path', function () {
-          it('appends "edit" to the path', function () {
+        describe('when the action is "edit" and we\'ve been down the standard path', () => {
+          it('appends "edit" to the path', () => {
             getStub.returns(['/next-page']);
             req.form.values['example-radio'] = 'clark-kent';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -427,12 +427,12 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the action is "edit" but we\'ve not been down the standard path', function () {
-          it('appends "edit" to the path', function () {
+        describe('when the action is "edit" but we\'ve not been down the standard path', () => {
+          it('appends "edit" to the path', () => {
             req.form.values['example-radio'] = 'clark-kent';
             controller.options.forks = [{
               target: '/target-page',
-              condition: function (request) {
+              condition(request) {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
@@ -444,11 +444,11 @@ describe('lib/base-controller', function () {
 
       });
 
-      describe('with more than one fork', function () {
+      describe('with more than one fork', () => {
 
-        describe('when the fields are the same', function () {
+        describe('when the fields are the same', () => {
 
-          beforeEach(function () {
+          beforeEach(() => {
             req.form = {values: {
               'example-radio': 'superman'
             }};
@@ -467,17 +467,17 @@ describe('lib/base-controller', function () {
             }];
           });
 
-          describe('and each condition is met', function () {
-            it('the last forks\' target becomes the next step', function () {
+          describe('and each condition is met', () => {
+            it('the last forks\' target becomes the next step', () => {
               controller.getNextStep(req, {}).should.contain('/batman-page');
             });
           });
 
         });
 
-        describe('when the fields are different', function () {
+        describe('when the fields are different', () => {
 
-          beforeEach(function () {
+          beforeEach(() => {
             controller.options.forks = [{
               target: '/superman-page',
               condition: {
@@ -493,26 +493,26 @@ describe('lib/base-controller', function () {
             }];
           });
 
-          describe('and each condition is met', function () {
-            beforeEach(function () {
+          describe('and each condition is met', () => {
+            beforeEach(() => {
               req.form = {values: {
                 'example-radio': 'superman',
                 'example-email': 'clarke@smallville.com'
               }};
             });
-            it('the last forks\' target becomes the next step', function () {
+            it('the last forks\' target becomes the next step', () => {
               controller.getNextStep(req, {}).should.contain('/smallville-page');
             });
           });
 
-          describe('and the first condition is met', function () {
-            beforeEach(function () {
+          describe('and the first condition is met', () => {
+            beforeEach(() => {
               req.form = {values: {
                 'example-radio': 'superman',
                 'example-email': 'kent@smallville.com'
               }};
             });
-            it('the first forks\' target becomes the next step', function () {
+            it('the first forks\' target becomes the next step', () => {
               controller.getNextStep(req, {}).should.contain('/superman-page');
             });
           });
@@ -522,18 +522,18 @@ describe('lib/base-controller', function () {
 
     });
 
-    describe('.getErrorStep()', function () {
-      var req = {};
-      var err = {};
+    describe('.getErrorStep()', () => {
+      const req = {};
+      const err = {};
 
-      beforeEach(function () {
+      beforeEach(() => {
         hmpoFormWizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
         req.params = {};
         controller = new Controller({template: 'foo'});
       });
 
-      describe('when the action is "edit" and the parent redirect is not edit', function () {
-        it('appends "edit" to the path', function () {
+      describe('when the action is "edit" and the parent redirect is not edit', () => {
+        it('appends "edit" to the path', () => {
           req.params.action = 'edit';
           controller.getErrorStep(err, req).should.contain('/edit');
         });

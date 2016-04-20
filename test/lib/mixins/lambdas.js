@@ -1,43 +1,41 @@
 'use strict';
 
-var lambdas = require('../../../lib/mixins/lambdas');
+const lambdas = require('../../../lib/mixins/lambdas');
 
-describe('Lambdas Mixins', function () {
-  var req = {};
-  var res = {
+describe('Lambdas Mixins', () => {
+  const req = {};
+  const res = {
     locals: {}
   };
-  var next = sinon.stub();
+  const next = sinon.stub();
 
-  beforeEach(function () {
+  beforeEach(() => {
     lambdas(req, res, next);
   });
 
-  it('should expose a renderField method via res.locals', function () {
+  it('should expose a renderField method via res.locals', () => {
     res.locals.should.have.property('renderField').and.be.a('function');
   });
 
-  describe('renderField', function () {
-    var renderField;
+  describe('renderField', () => {
+    let renderField;
 
-    beforeEach(function () {
+    beforeEach(() => {
       renderField = res.locals.renderField;
     });
 
-    it('should return a function', function () {
+    it('should return a function', () => {
       renderField().should.be.a('function');
     });
 
-    it('should lookup a mixin from res.locals and call it with key if found', function () {
-      var mixinStub = sinon.stub();
-      var renderFieldMixin = renderField();
-      var scope = {
+    it('should lookup a mixin from res.locals and call it with key if found', () => {
+      const mixinStub = sinon.stub();
+      const renderFieldMixin = renderField();
+      const scope = {
         key: 'a-key',
         mixin: 'a-mixin'
       };
-      res.locals['a-mixin'] = function() {
-        return mixinStub;
-      };
+      res.locals['a-mixin'] = () => mixinStub;
       renderFieldMixin.call(scope);
       mixinStub.should.have.been.calledOnce.and.calledWithExactly('a-key');
     });
