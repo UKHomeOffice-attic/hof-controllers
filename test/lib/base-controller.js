@@ -15,7 +15,9 @@ describe('lib/base-controller', function () {
   describe('constructor', function () {
 
     beforeEach(function () {
-      hmpoFormWizard.Controller = sinon.stub();
+      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function() {
+        this.options = {};
+      });
       hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
         'hmpo-form-wizard': hmpoFormWizard
@@ -70,6 +72,37 @@ describe('lib/base-controller', function () {
           .and.deep.equal({
             multiple: true
           });
+      });
+
+      describe('with locals', function () {
+        beforeEach(function () {
+          controller.getErrors = sinon.stub().returns({foo: true});
+          res.locals = {};
+          res.locals.values = {
+            'field-one': 1,
+            'field-two': 2,
+            'field-three': 3,
+            'field-four': 4
+          };
+
+          controller.options = {
+            steps: {
+              '/one': {
+                fields: ['field-one', 'field-two']
+              },
+              '/two': {
+                fields: ['field-three', 'field-four']
+              }
+            },
+            locals: {
+              test: 'bar',
+            }
+          };
+        });
+
+        it('should expose test in locals', function () {
+          controller.locals(req, res).should.have.property('test').and.equal('bar');
+        });
       });
     });
 
