@@ -226,6 +226,22 @@ describe('lib/base-controller', function () {
         });
       });
 
+      describe('when the action is "edit" and continueOnEdit is truthy', function () {
+        it('appends "/edit" to the path if next page is not /confirm', function () {
+          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
+          controller.options.continueOnEdit = true;
+          req.params.action = 'edit';
+          controller.getNextStep(req).should.contain('/edit');
+        });
+
+        it('doesn\'t append "/edit" to the path if next page is /confirm', function () {
+          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/confirm');
+          controller.options.continueOnEdit = true;
+          req.params.action = 'edit';
+          controller.getNextStep(req).should.not.contain('/edit');
+        });
+      });
+
       describe('with a fork', function () {
         var getStub;
 
