@@ -194,8 +194,14 @@ describe('lib/base-controller', function () {
       });
 
       describe('with a fork', function () {
+        var getStub;
 
         beforeEach(function () {
+          getStub = sinon.stub();
+          req.sessionModel = {
+            reset: sinon.stub(),
+            get: getStub
+          };
           req.form = {values: {}};
           hmpoFormWizard.Controller.prototype.getNextStep.returns('/next-page');
         });
@@ -258,6 +264,7 @@ describe('lib/base-controller', function () {
 
         describe('when the action is "edit"', function () {
           it('appends "edit" to the path', function () {
+            getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
               target: '/target-page',
