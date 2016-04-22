@@ -201,11 +201,18 @@ describe('lib/base-controller', function () {
 
     describe('.getNextStep()', function () {
       var req = {};
+      var getStub;
 
       beforeEach(function () {
+        getStub = sinon.stub();
+        getStub.returns(['/']);
         hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
-        req.params = {};
         req.baseUrl = '';
+        req.params = {};
+        req.sessionModel = {
+          reset: sinon.stub(),
+          get: getStub
+        };
         controller = new Controller({template: 'foo'});
         controller.options = {};
       });
@@ -231,6 +238,7 @@ describe('lib/base-controller', function () {
           hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
+          getStub.returns(['/step']);
           controller.getNextStep(req).should.contain('/edit');
         });
 
@@ -243,8 +251,6 @@ describe('lib/base-controller', function () {
       });
 
       describe('with a fork', function () {
-        var getStub;
-
         beforeEach(function () {
           getStub = sinon.stub();
           req.sessionModel = {
@@ -311,7 +317,7 @@ describe('lib/base-controller', function () {
           });
         });
 
-        describe('when the action is "edit"', function () {
+        describe('when the action is "edit" and we\'ve been down the fork', function () {
           it('appends "edit" to the path', function () {
             getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
@@ -321,9 +327,55 @@ describe('lib/base-controller', function () {
                 return request.form.values['example-radio'] === 'superman';
               }
             }];
-            controller.options.continueOnEdit = true;
+            controller.options.continueOnEdit = false;
             req.params.action = 'edit';
-            controller.getNextStep(req).should.contain('/edit');
+            controller.getNextStep(req).should.contain('/confirm');
+          });
+        });
+
+        describe('when the action is "edit" but we\'ve not been down the fork', function () {
+          it('appends "edit" to the path', function () {
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = false;
+            req.params.action = 'edit';
+            controller.getNextStep(req).should.contain('/target-page');
+          });
+        });
+
+        describe('when the action is "edit" and we\'ve been down the standard path', function () {
+          it('appends "edit" to the path', function () {
+            getStub.returns(['/next-page']);
+            req.form.values['example-radio'] = 'clark-kent';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = false;
+            req.params.action = 'edit';
+            controller.getNextStep(req).should.contain('/confirm');
+          });
+        });
+
+        describe('when the action is "edit" but we\'ve not been down the standard path', function () {
+          it('appends "edit" to the path', function () {
+            req.form.values['example-radio'] = 'clark-kent';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = false;
+            req.params.action = 'edit';
+            controller.getNextStep(req).should.contain('/next-page');
           });
         });
 
