@@ -200,13 +200,16 @@ describe('lib/base-controller', function () {
     });
 
     describe('.getNextStep()', function () {
-      var req = {};
+      var req = {
+        method: 'POST'
+      };
       var getStub;
 
       beforeEach(function () {
         getStub = sinon.stub();
         getStub.returns(['/']);
         hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
+        Controller.prototype.invalidatePath = sinon.stub();
         req.baseUrl = '';
         req.params = {};
         req.sessionModel = {
@@ -454,6 +457,156 @@ describe('lib/base-controller', function () {
             });
           });
 
+        });
+      });
+
+    });
+
+    describe('.invalidatePath()', function () {
+
+      beforeEach(function () {
+        Controller.prototype.invalidateStep = sinon.stub();
+        controller = new Controller({
+          confirmStep: '/confirm'
+        });
+        controller.options.steps = {
+          '/one': {
+            next: '/two',
+            forks: [{
+              target: '/fork-one'
+            }]
+          },
+          '/two': {
+            next: '/three'
+          },
+          '/three': {
+            next: '/four'
+          },
+          '/four': {
+            next: '/five'
+          },
+          '/five': {},
+          '/fork-one': {
+            next: '/fork-two'
+          },
+          '/fork-two': {
+            next: '/fork-three'
+          },
+          '/fork-three': {
+            next: '/five'
+          }
+        };
+      });
+
+      describe('invalidate path starting from /two, validate from /fork-one', function () {
+        beforeEach(function() {
+          controller.invalidatePath('/two', '/fork-one', {});
+        });
+
+        it('should invalidate 3 steps', function () {
+          Controller.prototype.invalidateStep.should.have.been.calledThrice;
+        });
+
+        it('should have been called with /two first', function () {
+          Controller.prototype.invalidateStep.args[0][0].should.be.equal('/two');
+        });
+
+        it('should have been called with /three second', function () {
+          Controller.prototype.invalidateStep.args[1][0].should.be.equal('/three');
+        });
+
+        it('should have been called with /four third', function () {
+          Controller.prototype.invalidateStep.args[2][0].should.be.equal('/four');
+        });
+      });
+
+      describe('invalidate path starting from /fork-one, validate from /two', function () {
+        beforeEach(function() {
+          controller.invalidatePath('/fork-one', '/two', {});
+        });
+
+        it('should invalidate 3 steps', function () {
+          Controller.prototype.invalidateStep.should.have.been.calledThrice;
+        });
+
+        it('should have been called with /fork-one first', function () {
+          Controller.prototype.invalidateStep.args[0][0].should.be.equal('/fork-one');
+        });
+
+        it('should have been called with /fork-two second', function () {
+          Controller.prototype.invalidateStep.args[1][0].should.be.equal('/fork-two');
+        });
+
+        it('should have been called with /fork-three third', function () {
+          Controller.prototype.invalidateStep.args[2][0].should.be.equal('/fork-three');
+        });
+      });
+    });
+
+    describe('.invalidateStep()', function () {
+
+      var sessionModel;
+
+      beforeEach(function () {
+        sessionModel = {
+          get: sinon.stub().returns(['/one', '/two', '/three', '/four']),
+          set: sinon.stub(),
+          unset: sinon.stub()
+        };
+        controller = new Controller({
+          confirmStep: '/confirm'
+        });
+        controller.options.steps = {
+          '/one': {
+            fields: [
+              'one-field-one',
+              'one-field-two',
+              'one-field-three'
+            ]
+          },
+          '/two': {
+            fields: [
+              'two-field-one',
+              'two-field-two',
+              'two-field-three'
+            ]
+          }
+        };
+      });
+
+      describe('step \'/one\' passed', function () {
+        beforeEach(function () {
+          controller.invalidateStep('/one', sessionModel);
+        });
+
+        it('should call unset with all fields from step /one', function () {
+          sessionModel.unset.should.have.been.calledWithExactly([
+            'one-field-one',
+            'one-field-two',
+            'one-field-three'
+          ]);
+        });
+
+        it('should set steps with /one removed', function () {
+          sessionModel.set.should.have.been.calledWithExactly('steps', ['/two', '/three', '/four']);
+        });
+      });
+
+      describe('step \'/two\' passed', function () {
+        beforeEach(function () {
+          controller.invalidateStep('/two', sessionModel);
+        });
+
+        it('should call unset with all fields from step /two', function () {
+          sessionModel.unset.should.have.been.calledWithExactly([
+            'two-field-one',
+            'two-field-two',
+            'two-field-three'
+          ]);
+        });
+
+        it('should set steps with /two removed', function () {
+          sessionModel.set.should.have.been.calledWithExactly('steps', ['/one', '/three', '/four']);
         });
       });
 
