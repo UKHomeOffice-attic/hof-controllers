@@ -318,7 +318,7 @@ describe('lib/base-controller', function () {
         });
 
         describe('when the action is "edit" and we\'ve been down the fork', function () {
-          it('appends "edit" to the path', function () {
+          it('should return /confirm if baseUrl is not set', function () {
             getStub.returns(['/target-page']);
             req.form.values['example-radio'] = 'superman';
             controller.options.forks = [{
@@ -329,7 +329,37 @@ describe('lib/base-controller', function () {
             }];
             controller.options.continueOnEdit = false;
             req.params.action = 'edit';
-            controller.getNextStep(req).should.contain('/confirm');
+            controller.getNextStep(req).should.equal('/confirm');
+          });
+
+          it('should return /a-base-url/confirm if baseUrl is set', function () {
+            getStub.returns(['/target-page']);
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = false;
+            req.params.action = 'edit';
+            req.baseUrl = '/a-base-url';
+            controller.getNextStep(req).should.equal('/a-base-url/confirm');
+          });
+
+          it('should append "edit" to the path if baseUrl is set and continueOnEdit is false', function () {
+            getStub.returns(['/target-page']);
+            req.form.values['example-radio'] = 'superman';
+            controller.options.forks = [{
+              target: '/target-page',
+              condition: function (request) {
+                return request.form.values['example-radio'] === 'superman';
+              }
+            }];
+            controller.options.continueOnEdit = true;
+            req.params.action = 'edit';
+            req.baseUrl = '/a-base-url';
+            controller.getNextStep(req).should.equal('/a-base-url/target-page/edit');
           });
         });
 
