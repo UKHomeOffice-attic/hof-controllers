@@ -29,6 +29,19 @@ Extends from [passports-form-wizard](https://github.com/UKHomeOffice/passports-f
   /* step options */
 }
 ```
+
+#### Added functionality for invalidating steps
+
+Removing fields from the session when the value of another field is changed. In the following example, when the value of `a_field` is changed, `field_1` and `field_2` - and their values - will be removed from the session model. If all the fields in a step are removed in this way, the entire step is removed from the session model too.
+
+This is useful when a user takes a fork in a journey, only to return to the fork and take the other route.
+
+```js
+a_field: {
+    invalidates: ['field_1', 'field_2']
+}
+```
+
 #### Handles edit actions.
 
 In the wizard options

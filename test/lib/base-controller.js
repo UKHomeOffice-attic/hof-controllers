@@ -1,6 +1,8 @@
 'use strict';
 
 var proxyquire = require('proxyquire');
+var EventEmitter = require('events');
+var util = require('util');
 
 describe('lib/base-controller', function () {
 
@@ -504,6 +506,71 @@ describe('lib/base-controller', function () {
           req.params.action = 'edit';
           controller.getErrorStep(err, req).should.contain('/edit');
         });
+      });
+
+    });
+
+    describe('.invalidateSteps()', function () {
+      var req = {};
+
+      beforeEach(function () {
+        hmpoFormWizard.Controller.prototype.saveValues = sinon.stub();
+
+        var SessionModel = function() {
+          EventEmitter.call(this);
+        };
+
+        util.inherits(SessionModel, EventEmitter);
+
+        SessionModel.prototype.set = function set(key, value) {
+          this[key] = value;
+        };
+
+        SessionModel.prototype.get = function get(key) {
+          return this[key];
+        };
+
+        req.sessionModel = new SessionModel();
+        req.sessionModel.set('steps', ['/step1', '/step2', '/step3']);
+        req.sessionModel.set('testField', 'A Value');
+        controller = new Controller({template: 'foo'});
+        controller.options.steps = {
+          '/step1': {
+            fields: [
+              'fieldOne',
+              'fieldTwo'
+            ]
+          },
+          '/step2': {
+            fields: [
+              'testField'
+            ]
+          }
+        };
+      });
+
+      it('should invalidate stepOne as all fields are invalidated', function () {
+        controller.options.fields = {
+          testField: {
+            invalidates: ['fieldOne', 'fieldTwo']
+          }
+        };
+        controller.invalidateSteps(req);
+        req.sessionModel.emit('change:testField');
+        req.sessionModel.get('steps').should.not.contain('/step1');
+      });
+
+      it('should not invalidate stepOne if it contains a field that isn\'t invalidated', function () {
+        req.sessionModel.set('fieldOne', true);
+        req.sessionModel.set('fieldTwo', true);
+        controller.options.fields = {
+          testField: {
+            invalidates: ['fieldTwo']
+          }
+        };
+        controller.invalidateSteps(req);
+        req.sessionModel.emit('change:testField');
+        req.sessionModel.get('steps').should.contain('/step1');
       });
 
     });
