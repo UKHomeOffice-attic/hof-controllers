@@ -11,7 +11,13 @@ var ConfirmController = proxyquire('../../lib/confirm-controller', {
 
 describe('lib/confirm-controller', function () {
   var req = {
-    params: {}
+    params: {},
+    sessionModel: {
+      get: sinon.stub().returns({
+        stepNumber: 0,
+        totalSteps: 0
+      })
+    }
   };
   var res = {};
   var controller;

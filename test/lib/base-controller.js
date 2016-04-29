@@ -19,6 +19,7 @@ describe('lib/base-controller', function () {
     beforeEach(function () {
       hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function() {
         this.options = {};
+        this.use = function() {};
       });
       hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
@@ -45,7 +46,13 @@ describe('lib/base-controller', function () {
     describe('.locals()', function () {
 
       var req = {
-        params: {}
+        params: {},
+        sessionModel: {
+          get: sinon.stub().returns({
+            stepNumber: 0,
+            totalSteps: 0
+          })
+        }
       };
       var res = {};
 
