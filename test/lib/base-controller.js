@@ -4,29 +4,29 @@ var proxyquire = require('proxyquire');
 
 describe('lib/base-controller', function () {
 
-  var hmpoFormWizard;
+  var Parent;
   var Controller;
   var controller;
 
   beforeEach(function () {
-    hmpoFormWizard = require('hmpo-form-wizard');
+    Parent = require('hmpo-date-controller');
   });
 
   describe('constructor', function () {
 
     beforeEach(function () {
-      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function() {
+      Parent = sinon.spy(function() {
         this.options = {};
       });
-      hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
+      Parent.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard
+        'hmpo-date-controller': Parent
       });
     });
 
     it('calls the parent constructor', function () {
       controller = new Controller({template: 'foo'});
-      hmpoFormWizard.Controller.should.have.been.called;
+      Parent.should.have.been.called;
     });
 
   });
@@ -34,9 +34,10 @@ describe('lib/base-controller', function () {
   describe('methods', function () {
 
     beforeEach(function () {
-      hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
+      Parent.prototype.getNextStep = sinon.stub();
+      Parent.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard
+        'hmpo-date-controller': Parent
       });
     });
 
@@ -114,7 +115,7 @@ describe('lib/base-controller', function () {
       var callback;
 
       beforeEach(function () {
-        hmpoFormWizard.Controller.prototype.getValues = sinon.stub();
+        Parent.prototype.getValues = sinon.stub();
         Controller.prototype.getErrors = sinon.stub();
         req = {
           sessionModel: {
@@ -193,7 +194,7 @@ describe('lib/base-controller', function () {
         controller = new Controller({template: 'foo'});
         controller.options = {};
         controller.getValues(req, res, callback);
-        hmpoFormWizard.Controller.prototype.getValues
+        Parent.prototype.getValues
           .should.always.have.been.calledWithExactly(req, res, callback);
       });
 
@@ -206,7 +207,7 @@ describe('lib/base-controller', function () {
       beforeEach(function () {
         getStub = sinon.stub();
         getStub.returns(['/']);
-        hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
+        Parent.prototype.getNextStep = sinon.stub().returns('/');
         req.baseUrl = '';
         req.params = {};
         req.sessionModel = {
@@ -235,7 +236,7 @@ describe('lib/base-controller', function () {
 
       describe('when the action is "edit" and continueOnEdit is truthy', function () {
         it('appends "/edit" to the path if next page is not /confirm', function () {
-          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
+          Parent.prototype.getNextStep = sinon.stub().returns('/step');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
           getStub.returns(['/step']);
@@ -243,7 +244,7 @@ describe('lib/base-controller', function () {
         });
 
         it('doesn\'t append "/edit" to the path if next page is /confirm', function () {
-          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/confirm');
+          Parent.prototype.getNextStep = sinon.stub().returns('/confirm');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
           controller.getNextStep(req).should.not.contain('/edit');
@@ -258,7 +259,7 @@ describe('lib/base-controller', function () {
             get: getStub
           };
           req.form = {values: {}};
-          hmpoFormWizard.Controller.prototype.getNextStep.returns('/next-page');
+          Parent.prototype.getNextStep.returns('/next-page');
         });
 
         describe('when the condition config is met', function () {
@@ -494,7 +495,7 @@ describe('lib/base-controller', function () {
       var err = {};
 
       beforeEach(function () {
-        hmpoFormWizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
+        Parent.prototype.getErrorStep = sinon.stub().returns('/');
         req.params = {};
         controller = new Controller({template: 'foo'});
       });
