@@ -15,6 +15,7 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
+    "hmpo-date-controller": "^1.0.0",
     "hmpo-form-wizard": "^3.2.0",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
