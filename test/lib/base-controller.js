@@ -20,7 +20,8 @@ describe('lib/base-controller', function () {
       });
       hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard
+        'hmpo-form-wizard': hmpoFormWizard,
+        './middleware/mixins': {}
       });
     });
 
@@ -72,6 +73,38 @@ describe('lib/base-controller', function () {
           .and.deep.equal({
             multiple: true
           });
+      });
+
+      describe('with fields', function () {
+        var locals;
+        beforeEach(function () {
+          controller.getErrors = sinon.stub().returns({foo: true});
+          controller.options.fields = {
+            'a-field': {
+              mixin: 'input-text'
+            },
+            'another-field': {
+              mixin: 'input-number'
+            }
+          };
+          locals = controller.locals(req, res);
+        });
+
+        it('should have added a fields array to return object', function () {
+          locals.should.have.property('fields').and.be.an('array');
+        });
+
+        it('should have added 2 items to the fields array', function () {
+          locals.fields.length.should.be.equal(2);
+        });
+
+        it('should have added \'a-field\' as \'key\' property to the first object', function () {
+          locals.fields[0].key.should.be.equal('a-field');
+        });
+
+        it('should have added \'input-text\' as \'mixin\' property to the first object', function () {
+          locals.fields[0].mixin.should.be.equal('input-text');
+        });
       });
 
       describe('with locals', function () {

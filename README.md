@@ -79,6 +79,47 @@ Template
 <div class="{{foo}}"></div>
 ```
 
+#### Exposes fields to templates
+
+Fields given in step config will be exposed to the template along with a mixin if defined in field config. This can be used with the [renderField](#renderField) mixin to programmatically generate templates.
+
+steps.js
+```js
+steps: {
+  'step-1': {
+    fields: [
+      'field-1',
+      'field-2'
+    ]
+  }
+}
+```
+
+fields.js
+```js
+fields: {
+  'field-1': {
+    mixin: 'input-text',
+    ...
+  },
+  'field-2': {
+    mixin: 'radio-group',
+    ...
+  }
+}
+```
+
+exposed to templates in format:
+```js
+fields: [{
+  key: 'field-1',
+  mixin: 'input-text'
+}, {
+  key: 'field-2',
+  mixin: 'radio-group'
+}]
+```
+
 #### Handles journey forking
 
 Each step definition accepts a `next` property, the value of which is the next route in the journey. By default, when the form is successfully submitted, the next steps will load. However, there are times when it is necessary to fork from the current journey based on a users response to certain questions in a form. For such circumstances there exists the `forks` property.
@@ -260,6 +301,20 @@ In config page template
 ```
 
 ------------------------------
+
+------------------------------
+
+## Mixins
+
+### renderField
+
+The renderField mixin can be called in your template with the field to render as the scope. This will lookup the field.mixin in res.locals and call it passing the field key.
+
+```html
+{{#fields}}
+  {{#renderField}}{{/renderField}}
+{{/fields}}
+```
 
 ## Test
 
