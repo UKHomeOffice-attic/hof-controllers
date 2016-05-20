@@ -1,22 +1,22 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire');
 
-var Controller = sinon.stub();
+const Controller = sinon.stub();
 Controller.prototype = {};
 
-var ConfirmController = proxyquire('../../lib/confirm-controller', {
+const ConfirmController = proxyquire('../../lib/confirm-controller', {
   './base-controller': Controller
 });
 
-describe('lib/confirm-controller', function () {
-  var req = {
+describe('lib/confirm-controller', () => {
+  const req = {
     params: {}
   };
-  var res = {};
-  var controller;
+  const res = {};
+  let controller;
 
-  beforeEach(function () {
+  beforeEach(() => {
     controller = new ConfirmController({
       template: 'foo'
     });
@@ -52,56 +52,56 @@ describe('lib/confirm-controller', function () {
     };
   });
 
-  describe('tableSections', function () {
-    var locals;
+  describe('tableSections', () => {
+    let locals;
 
-    beforeEach(function() {
+    beforeEach(() => {
       locals = controller.locals(req, res);
     });
 
-    it('should have exposed a tableSections array', function () {
+    it('should have exposed a tableSections array', () => {
       locals.should.have.property('tableSections').and.be.an.instanceOf(Array);
     });
 
-    it('should have 1 section', function () {
+    it('should have 1 section', () => {
       locals.tableSections.length.should.be.equal(1);
     });
 
-    it('should have a fields array', function () {
+    it('should have a fields array', () => {
       locals.tableSections[0].should.have.property('fields').and.be.an.instanceOf(Array);
     });
 
-    describe('fields', function () {
-      var fields;
+    describe('fields', () => {
+      let fields;
 
-      beforeEach(function () {
+      beforeEach(() => {
         fields = locals.tableSections[0].fields;
       });
 
-      it('should have 4 items', function () {
+      it('should have 4 items', () => {
         fields.length.should.be.equal(4);
       });
 
-      it('should contain objects', function () {
+      it('should contain objects', () => {
         fields[0].should.be.an.instanceOf(Object);
         fields[1].should.be.an.instanceOf(Object);
         fields[2].should.be.an.instanceOf(Object);
         fields[3].should.be.an.instanceOf(Object);
       });
 
-      it('should have set value: 1 on the field object', function () {
+      it('should have set value: 1 on the field object', () => {
         fields[0].should.have.property('value').and.equal(1);
       });
 
-      it('should have set step: /one on the field object', function () {
+      it('should have set step: /one on the field object', () => {
         fields[0].should.have.property('step').and.equal('/one');
       });
 
-      it('should have set value 3 on the 3rd field object', function () {
+      it('should have set value 3 on the 3rd field object', () => {
         fields[2].should.have.property('value').and.equal(3);
       });
 
-      it('should have set step: /two on the 3rd field object', function () {
+      it('should have set step: /two on the 3rd field object', () => {
         fields[3].should.have.property('step').and.equal('/two');
       });
     });

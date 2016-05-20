@@ -1,24 +1,24 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var moment = require('moment');
+const proxyquire = require('proxyquire');
+const moment = require('moment');
 
-var Controller = sinon.stub();
+const Controller = sinon.stub();
 Controller.prototype = {};
 Controller.prototype.validateField = sinon.stub();
 
-var DateController = proxyquire('../../lib/date-controller', {
+const DateController = proxyquire('../../lib/date-controller', {
   './base-controller': Controller
 });
 
-var ErrorClass = require('../../lib/error-controller');
+const ErrorClass = require('../../lib/error-controller');
 
-describe('lib/date-controller', function () {
+describe('lib/date-controller', () => {
 
-  var controller;
-  var args = {template: 'index'};
+  let controller;
+  const args = {template: 'index'};
 
-  beforeEach(function () {
+  beforeEach(() => {
     controller = new DateController(args);
     controller.dateKey = 'date';
     controller.options = {};
@@ -27,36 +27,36 @@ describe('lib/date-controller', function () {
     };
   });
 
-  describe('instantiated', function () {
-    it('calls Controller with the arguments', function () {
+  describe('instantiated', () => {
+    it('calls Controller with the arguments', () => {
       Controller.should.have.been.called;
     });
   });
 
-  describe('validateField(keyToValidate, req)', function () {
+  describe('validateField(keyToValidate, req)', () => {
 
-    var req = {
+    const req = {
       form: {
         values: {}
       }
     };
 
-    describe('validation', function () {
+    describe('validation', () => {
 
-      describe('required error', function () {
+      describe('required error', () => {
 
-        it('returns an error class when the field is undefined', function () {
+        it('returns an error class when the field is undefined', () => {
           req.form.values.date = undefined;
-          var undefinedCheck = controller.validateField('date', req);
+          const undefinedCheck = controller.validateField('date', req);
 
           undefinedCheck.should.be.an.instanceof(ErrorClass);
           undefinedCheck.should.have.property('key').and.equal('date');
           undefinedCheck.should.have.property('type').and.equal('required');
         });
 
-        it('returns an error class when the field is an empty string', function () {
+        it('returns an error class when the field is an empty string', () => {
           req.form.values.date = '';
-          var emptyStringCheck = controller.validateField('date', req);
+          const emptyStringCheck = controller.validateField('date', req);
 
           emptyStringCheck.should.be.an.instanceof(ErrorClass);
           emptyStringCheck.should.have.property('key').and.equal('date');
@@ -65,11 +65,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('numeric error', function () {
+      describe('numeric error', () => {
 
-        it('returns an error class when the field is not numeric', function () {
+        it('returns an error class when the field is not numeric', () => {
           req.form.values.date = 'ab-cd-efgh';
-          var numericCheck = controller.validateField('date', req);
+          const numericCheck = controller.validateField('date', req);
 
           numericCheck.should.be.an.instanceof(ErrorClass);
           numericCheck.should.have.property('key').and.equal('date');
@@ -78,11 +78,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('format error', function () {
+      describe('format error', () => {
 
-        it('returns an error class when the field is incorrectly formatted', function () {
+        it('returns an error class when the field is incorrectly formatted', () => {
           req.form.values.date = '01-13-1982';
-          var formatCheck = controller.validateField('date', req);
+          const formatCheck = controller.validateField('date', req);
 
           formatCheck.should.be.an.instanceof(ErrorClass);
           formatCheck.should.have.property('key').and.equal('date');
@@ -91,11 +91,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('future error', function () {
+      describe('future error', () => {
 
-        it('returns an error class when the field is in the future', function () {
+        it('returns an error class when the field is in the future', () => {
           req.form.values.date = moment().add(1, 'day').format('DD-MM-YYYY');
-          var formatCheck = controller.validateField('date', req);
+          const formatCheck = controller.validateField('date', req);
 
           formatCheck.should.be.an.instanceof(ErrorClass);
           formatCheck.should.have.property('key').and.equal('date');
@@ -104,21 +104,21 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('can be overridden', function () {
+      describe('can be overridden', () => {
 
-        it('does not return an error for non-numeric values if numeric is not specficied as a validator', function () {
+        it('does not return an error for non-numeric values if numeric is not specficied as a validator', () => {
           controller.options.fields.date.validate = ['required', 'format', 'future'];
           req.form.values.date = 'ab-cd-efgh';
 
-          var error = controller.validateField('date', req);
+          const error = controller.validateField('date', req);
           error.should.have.property('type').and.not.equal('numeric');
         });
 
-        it('does not return an error if validate property is empty', function () {
+        it('does not return an error if validate property is empty', () => {
           controller.options.fields.date.validate = [];
           req.form.values.date = 'ab-cd-efgh';
 
-          var error = controller.validateField('date', req);
+          const error = controller.validateField('date', req);
           should.equal(error, undefined);
         });
 
@@ -126,17 +126,17 @@ describe('lib/date-controller', function () {
 
     });
 
-    describe('when the date is not required', function () {
+    describe('when the date is not required', () => {
 
-      describe('required error', function () {
+      describe('required error', () => {
 
-        it('does not return an error when the field is undefined', function () {
+        it('does not return an error when the field is undefined', () => {
           req.form.values.date = undefined;
 
           should.equal(controller.validateField('date', req, false), undefined);
         });
 
-        it('does not return an error when the field is an empty string', function () {
+        it('does not return an error when the field is an empty string', () => {
           req.form.values.date = '';
 
           should.equal(controller.validateField('date', req, false), undefined);
@@ -144,11 +144,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('numeric error', function () {
+      describe('numeric error', () => {
 
-        it('returns an error class when the field is not numeric', function () {
+        it('returns an error class when the field is not numeric', () => {
           req.form.values.date = 'ab-cd-efgh';
-          var numericCheck = controller.validateField('date', req, false);
+          const numericCheck = controller.validateField('date', req, false);
 
           numericCheck.should.be.an.instanceof(ErrorClass);
           numericCheck.should.have.property('key').and.equal('date');
@@ -157,11 +157,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('format error', function () {
+      describe('format error', () => {
 
-        it('returns an error class when the field is incorrectly formatted', function () {
+        it('returns an error class when the field is incorrectly formatted', () => {
           req.form.values.date = '01-13-1982';
-          var formatCheck = controller.validateField('date', req, false);
+          const formatCheck = controller.validateField('date', req, false);
 
           formatCheck.should.be.an.instanceof(ErrorClass);
           formatCheck.should.have.property('key').and.equal('date');
@@ -170,11 +170,11 @@ describe('lib/date-controller', function () {
 
       });
 
-      describe('future error', function () {
+      describe('future error', () => {
 
-        it('returns an error class when the field is in the future', function () {
+        it('returns an error class when the field is in the future', () => {
           req.form.values.date = moment().add(1, 'day').format('DD-MM-YYYY');
-          var formatCheck = controller.validateField('date', req, false);
+          const formatCheck = controller.validateField('date', req, false);
 
           formatCheck.should.be.an.instanceof(ErrorClass);
           formatCheck.should.have.property('key').and.equal('date');
@@ -185,16 +185,16 @@ describe('lib/date-controller', function () {
 
     });
 
-    describe('valid field', function () {
+    describe('valid field', () => {
 
-      it('returns undefined', function () {
+      it('returns undefined', () => {
         req.form.values.date = '01-01-2015';
         should.equal(controller.validateField('date', req), undefined);
       });
     });
 
-    describe('when the key is not a date', function () {
-      it('calls the parent class validateField', function () {
+    describe('when the key is not a date', () => {
+      it('calls the parent class validateField', () => {
         Controller.prototype.validateField.returns('parent controller');
 
         controller.validateField('first-name', req).should.equal('parent controller');
@@ -202,10 +202,9 @@ describe('lib/date-controller', function () {
     });
   });
 
-  describe('.process()', function () {
-    describe('with all date parts', function () {
-      var callback;
-      var req = {
+  describe('.process()', () => {
+    describe('with all date parts', () => {
+      const req = {
         form: {
           values: {
             'date-day': '01',
@@ -214,25 +213,25 @@ describe('lib/date-controller', function () {
           }
         }
       };
+      let callback;
 
-      beforeEach(function () {
+      beforeEach(() => {
         callback = sinon.stub();
         controller = new DateController(args);
         controller.dateKey = 'date';
         controller.process(req, {}, callback);
       });
 
-      it('creates a date field', function () {
+      it('creates a date field', () => {
         req.form.values.date.should.equal('01-01-2015');
       });
-      it('calls callback', function () {
+      it('calls callback', () => {
         callback.should.have.been.called;
       });
 
     });
-    describe('with missing date parts', function () {
-      var callback;
-      var req = {
+    describe('with missing date parts', () => {
+      const req = {
         form: {
           values: {
             'date-day': '01',
@@ -241,31 +240,32 @@ describe('lib/date-controller', function () {
           }
         }
       };
+      let callback;
 
-      beforeEach(function () {
+      beforeEach(() => {
         callback = sinon.stub();
         controller = new DateController({template: 'index'});
         controller.dateKey = 'date';
         controller.process(req, {}, callback);
       });
-      it('creates a date field', function () {
+      it('creates a date field', () => {
         should.equal(req.form.values.date, undefined);
       });
-      it('calls callback', function () {
+      it('calls callback', () => {
         callback.should.have.been.called;
       });
     });
   });
 
-  describe('format', function () {
-    var callback;
-    var req = {
+  describe('format', () => {
+    const req = {
       form: {
         values: {}
       }
     };
+    let callback;
 
-   beforeEach(function () {
+   beforeEach(() => {
       callback = sinon.stub();
       controller = new DateController({template: 'index'});
       controller.dateKey = 'date';
@@ -273,7 +273,7 @@ describe('lib/date-controller', function () {
       controller.process(req, {}, callback);
     });
 
-    it('formats the date property to GDS style date if no prettyDate option passed in', function () {
+    it('formats the date property to GDS style date if no prettyDate option passed in', () => {
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
       req.form.values['date-year'] = '1982';
@@ -282,7 +282,7 @@ describe('lib/date-controller', function () {
       req.form.values['date-formatted'].should.equal('1 November 1982');
     });
 
-    it('takes a custom date style date if prettyDate option passed in', function () {
+    it('takes a custom date style date if prettyDate option passed in', () => {
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
       req.form.values['date-year'] = '1982';
@@ -292,14 +292,14 @@ describe('lib/date-controller', function () {
       req.form.values['date-formatted'].should.equal('1/November/1982');
     });
 
-    it('sets dataFormat to DD-MM-YYYY if no dateFormat option passed in', function() {
+    it('sets dataFormat to DD-MM-YYYY if no dateFormat option passed in', () => {
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
       req.form.values['date-year'] = '1982';
       req.form.values.date.should.equal('01-11-1982');
     });
 
-    it('takes a custom date format if the dateFormat option passed in', function () {
+    it('takes a custom date format if the dateFormat option passed in', () => {
       callback = sinon.stub();
       req.form.values['date-day'] = '01';
       req.form.values['date-month'] = '11';
