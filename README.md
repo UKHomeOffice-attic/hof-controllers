@@ -316,6 +316,64 @@ The renderField mixin can be called in your template with the field to render as
 {{/fields}}
 ```
 
+#### conditionally rendering fields
+
+`renderField` supports conditionally omitting fields if `useWhen` is passed in field config.  `useWhen` accepts another field key `String` and checks the value is `true`, or an `Object` with the keys `field` and `value`.  The field to check cannot appear on the same step - consider using the `toggle` property to show/hide a field on the same step.
+
+```js
+'field-1': {
+  useWhen: 'field-2'
+}
+```
+`field-1` will only be included if `field-2` value is `true`
+
+```js
+'field-3': {
+  useWhen: {
+    field: 'field-4',
+    value: 'a-value'
+  }
+}
+```
+`field-3` will only be included if `field-4` value is `a-value`
+
+##### Use case
+
+When a field on a multiple-step form is only to be included depending on the outcome of a previous answer. In the below example `dependant-field` is only included on step-2 if `dependent-radio` on step-1 is `'yes'`;
+
+steps.js
+```js
+{
+  '/step-1': {
+    fields: [
+      'dependent-radio'
+    ]
+  },
+  '/step-2': {
+    fields: [
+      'dependant-field',
+      'regular-field'
+    ]
+  }
+}
+```
+
+fields.js
+```js
+{
+  'dependent-radio': {
+    options: ['yes', 'no']
+  },
+  'dependant-field': {
+    useWhen: {
+      field: 'dependant-field',
+      value: 'yes'
+    }
+  },
+  'regular-field': {}
+}
+```
+
 ## Test
 
 ```bash
