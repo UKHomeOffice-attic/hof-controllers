@@ -41,6 +41,56 @@ describe('lib/base-controller', () => {
       });
     });
 
+    describe('.getBackLink()', () => {
+      const req = {};
+      const res = {
+        locals: {}
+      };
+
+      beforeEach(() => {
+        res.locals.backLink = '';
+        req.baseUrl = '/base';
+        req.params = {};
+        controller = new Controller({
+          template: 'foo'
+        });
+      });
+
+      it('returns an empty string if res.locals.backLink is an empty string', () => {
+        controller.getBackLink(req, res).should.be.equal('');
+      });
+
+      it('returns the backLink unaltered if not editing and baseUrl is set', () => {
+        res.locals.backLink = 'backLink';
+        controller.getBackLink(req, res).should.be.equal('backLink');
+      });
+
+      it('prepends a slash if baseUrl is /', () => {
+        res.locals.backLink = 'backLink';
+        req.baseUrl = '/';
+        controller.getBackLink(req, res).should.be.equal('/backLink');
+      });
+
+      it('prepends a slash if baseUrl is an empty string', () => {
+        res.locals.backLink = 'backLink';
+        req.baseUrl = '';
+        controller.getBackLink(req, res).should.be.equal('/backLink');
+      });
+
+      it('appends /edit if editing', () => {
+        req.params.action = 'edit';
+        res.locals.backLink = 'backLink';
+        controller.getBackLink(req, res).should.be.equal('backLink/edit');
+      });
+
+      it('appends /edit and prepends a slash if editing and baseUrl not set', () => {
+        req.params.action = 'edit';
+        req.baseUrl = '/';
+        res.locals.backLink = 'backLink';
+        controller.getBackLink(req, res).should.be.equal('/backLink/edit');
+      });
+    });
+
     describe('.locals()', () => {
 
       const req = {
@@ -49,26 +99,37 @@ describe('lib/base-controller', () => {
       const res = {};
 
       beforeEach(() => {
+        sinon.stub(Controller.prototype, 'getBackLink');
+        sinon.stub(Controller.prototype, 'getErrorLength');
+        Controller.prototype.getErrorLength.returns({single: true});
         controller = new Controller({
           template: 'foo'
         });
       });
 
+      afterEach(() => {
+        Controller.prototype.getBackLink.restore();
+        Controller.prototype.getErrorLength.restore();
+      });
+
       it('always extends from parent locals', () => {
-        controller.getErrors = sinon.stub().returns({foo: true});
         controller.locals(req, res).should.have.property('foo').and.always.equal('bar');
       });
 
       it('returns errorLength.single if there is one error', () => {
-        controller.getErrors = sinon.stub().returns({foo: true});
         controller.locals(req, res).should.have.property('errorLength')
           .and.deep.equal({
             single: true
           });
       });
 
+      it('calls getBackLink', () => {
+        controller.locals(req, res);
+        Controller.prototype.getBackLink.should.have.been.calledOnce;
+      });
+
       it('returns errorLength.multiple if there is more than one error', () => {
-        controller.getErrors = sinon.stub().returns({bar: true, baz: true});
+        Controller.prototype.getErrorLength.returns({multiple: true});
         controller.locals(req, res).should.have.property('errorLength')
           .and.deep.equal({
             multiple: true
@@ -78,7 +139,6 @@ describe('lib/base-controller', () => {
       describe('with fields', () => {
         let locals;
         beforeEach(() => {
-          controller.getErrors = sinon.stub().returns({foo: true});
           controller.options.fields = {
             'a-field': {
               mixin: 'input-text'
@@ -109,7 +169,6 @@ describe('lib/base-controller', () => {
 
       describe('with locals', () => {
         beforeEach(() => {
-          controller.getErrors = sinon.stub().returns({foo: true});
           res.locals = {};
           res.locals.values = {
             'field-one': 1,
@@ -148,7 +207,7 @@ describe('lib/base-controller', () => {
 
       beforeEach(() => {
         hmpoFormWizard.Controller.prototype.getValues = sinon.stub();
-        Controller.prototype.getErrors = sinon.stub();
+        Controller.prototype.getErrorLength = sinon.stub();
         req = {
           sessionModel: {
             reset: sinon.stub()
