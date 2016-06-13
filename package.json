@@ -15,7 +15,7 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
-    "hmpo-form-wizard": "^3.2.0",
+    "hmpo-form-wizard": "https://github.com/UKHomeOffice/passports-form-wizard.git#so-master",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
     "moment-business": "^2.0.0"
