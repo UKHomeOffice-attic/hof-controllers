@@ -1,6 +1,6 @@
 {
   "name": "hof-controllers",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "A collection of controllers commonly used in HOF",
   "main": "index.js",
   "license": "GPL-2.0",
