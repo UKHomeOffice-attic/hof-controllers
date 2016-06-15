@@ -56,6 +56,11 @@ describe('lib/confirm-controller', () => {
     let locals;
 
     beforeEach(() => {
+      req.url = '';
+      req.sessionModel = {
+        get: sinon.stub().returns([]),
+        set: sinon.stub()
+      };
       locals = controller.locals(req, res);
     });
 

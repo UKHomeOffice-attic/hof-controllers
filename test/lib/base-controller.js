@@ -42,9 +42,17 @@ describe('lib/base-controller', () => {
     });
 
     describe('.locals()', () => {
+      const getStub = sinon.stub();
+      getStub.withArgs('steps').returns([]);
+      getStub.withArgs('stepData').returns({});
 
       const req = {
-        params: {}
+        url: '',
+        params: {},
+        sessionModel: {
+          get: getStub,
+          set: sinon.stub()
+        }
       };
       const res = {};
 
@@ -135,6 +143,82 @@ describe('lib/base-controller', () => {
 
         it('should expose test in locals', () => {
           controller.locals(req, res).should.have.property('test').and.equal('bar');
+        });
+      });
+
+      describe('with step number', () => {
+
+        beforeEach(() => {
+          controller.getErrors = sinon.stub().returns({foo: true});
+          req.sessionModel = {
+            get: sinon.stub(),
+            set: sinon.stub()
+          };
+          req.sessionModel.get.withArgs('steps').returns([]);
+          req.sessionModel.get.withArgs('stepData').returns({});
+          req.url = '/current-step';
+        });
+
+        it('returns an object with a stepNumber property', () => {
+          controller.locals(req, res).should.have.property('stepNumber');
+        });
+
+        it('has a stepNumber of 1 if stepsJourney is empty', () => {
+          controller.locals(req, res).stepNumber.should.be.equal(1);
+        });
+
+        it('has a stepNumber of 2 if step is in position 2', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step1']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1'],
+            prevStep: '/step1'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(2);
+        });
+
+        it('has a stepNumber of 3 if step is in position 3', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step1', '/step2']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1', '/step2'],
+            prevStep: '/step2'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(3);
+        });
+
+        it('has a stepNumber of 4 if step is in position 4', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step1', '/step2', '/step3']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1', '/step2', '/step3'],
+            prevStep: '/step3'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(4);
+        });
+
+        it('doesn\'t matter what order the steps were visited in', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step3', '/step2', '/step1']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1', '/step2', '/step3'],
+            prevStep: '/step3'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(4);
+        });
+
+        it('ignores invalidated steps', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step1', '/step3']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1', '/step2', '/step3'],
+            prevStep: '/step3'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(3);
+        });
+
+        it('inserts the next step after the prevStep', () => {
+          req.sessionModel.get.withArgs('steps').returns(['/step1', '/step2', '/step3']);
+          req.sessionModel.get.withArgs('stepData').returns({
+            stepsJourney: ['/step1', '/step2', '/step3'],
+            prevStep: '/step1'
+          });
+          controller.locals(req, res).stepNumber.should.be.equal(2);
         });
       });
     });
