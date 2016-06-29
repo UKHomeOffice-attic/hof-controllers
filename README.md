@@ -292,12 +292,37 @@ In step options
 }
 ```
 
-In config page template
+In confirm page template
 
 ```html
-{{#tableSections}}
-  {{> partials-summary-table}} <!-- {{name}}, {{value}} and {{step}} are available in this scope -->
-{{/tableSections}}
+<h1>Check your details before continuing</h1>
+
+<table>
+    <thead>
+    </thead>
+    <tbody>
+      {{#tableSections}}
+        {{> partials-summary-table}}
+      {{/tableSections}}
+    </tbody>
+</table>
+
+```
+
+Then to build the partial, which includes edit button 
+
+```html
+{{#fields}}
+  {{#value}}
+    <tr>
+      <td class="confirm-name">{{#t}}pages.confirm.table.headers.{{name}}{{/t}}</td>
+      <td class="confirm-value" id="{{name}}">{{{value}}}</td>
+      <td class="confirm-change"><a id="{{name}}-change" href="/{{step}}/edit#{{name}}" class="button">{{#t}}buttons.change{{/t}}
+      <span class="visuallyhidden">{{#t}}pages.confirm.table.headers.{{name}}{{/t}}</span></a></td>
+    </tr>
+  {{/value}}
+{{/fields}}
+
 ```
 
 ------------------------------
