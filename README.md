@@ -309,7 +309,7 @@ In confirm page template
 
 ```
 
-Then to build the partial, which includes edit button 
+Then to build the template partial 
 
 ```html
 {{#fields}}
