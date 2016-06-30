@@ -60,6 +60,11 @@ describe('lib/base-controller', () => {
         controller.getBackLink(req, res).should.be.equal('');
       });
 
+      it('returns null if res.locals.backLink is null', () => {
+        res.locals.backLink = null;
+        should.not.exist(controller.getBackLink(req, res));
+      });
+
       it('returns the backLink unaltered if not editing and baseUrl is set', () => {
         res.locals.backLink = 'backLink';
         controller.getBackLink(req, res).should.be.equal('backLink');
