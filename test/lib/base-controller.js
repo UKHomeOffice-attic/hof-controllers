@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const proxyquire = require('proxyquire');
 
 describe('lib/base-controller', () => {
@@ -39,6 +40,43 @@ describe('lib/base-controller', () => {
       Controller = proxyquire('../../lib/base-controller', {
         'hmpo-form-wizard': hmpoFormWizard
       });
+    });
+
+    describe('.get()', () => {
+      const req = {};
+      const res = {
+        locals: {
+          partials: {
+            step: 'default-template'
+          }
+        }
+      };
+
+      beforeEach(() => {
+        res.render = sinon.stub();
+        hmpoFormWizard.Controller.prototype.get = sinon.stub();
+        controller = new Controller({
+          template: 'foo'
+        });
+      });
+
+      it('calls super', () => {
+        controller.get(req, res, _.noop);
+        hmpoFormWizard.Controller.prototype.get.should.have.been.calledOnce
+          .and.calledWithExactly(req, res, _.noop);
+      });
+
+      it('calls res.render with the template', () => {
+        controller.get(req, res, _.noop);
+        res.render.should.have.been.calledOnce;
+      });
+
+      it('sets template to res.locals.partials.step if view lookup error', () => {
+        res.render = (template, cb) => cb(new Error('Failed to lookup view'));
+        controller.get(req, res, _.noop);
+        controller.options.template.should.be.equal('default-template');
+      });
+
     });
 
     describe('.getBackLink()', () => {
