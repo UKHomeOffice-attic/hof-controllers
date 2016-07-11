@@ -10,8 +10,9 @@
   "homepage": "https://github.com/UKHomeOffice/hof-controllers",
   "author": "HomeOffice",
   "scripts": {
-    "test": "NODE_ENV=test mocha",
+    "test": "NODE_ENV=test npm run lint && npm run style && npm run mocha",
     "lint": "eslint .",
+    "mocha": "mocha",
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {

@@ -23,7 +23,7 @@ describe('Lambdas Mixins', () => {
   });
 
   describe('renderField', () => {
-    const scope = {
+    let scope = {
       key: 'a-key',
       mixin: 'a-mixin'
     };
@@ -44,11 +44,6 @@ describe('Lambdas Mixins', () => {
     });
 
     it('should lookup a mixin from res.locals and call it with key if found', () => {
-      const renderFieldMixin = renderField();
-      const scope = {
-        key: 'a-key',
-        mixin: 'a-mixin'
-      };
       res.locals['a-mixin'] = () => mixinStub;
       renderFieldMixin.call(scope);
       mixinStub.should.have.been.calledOnce.and.calledWithExactly('a-key');
@@ -63,8 +58,6 @@ describe('Lambdas Mixins', () => {
 
     describe('with useWhen', () => {
       describe('condition not met', () => {
-        let renderFieldMixin;
-        let scope;
         beforeEach(() => {
           renderFieldMixin = renderField();
           scope = {
@@ -98,8 +91,8 @@ describe('Lambdas Mixins', () => {
 
       describe('condition met', () => {
         it('looks up and calls the mixin from res.locals', () => {
-          const renderFieldMixin = renderField();
-          const scope = {
+          renderFieldMixin = renderField();
+          scope = {
             key: 'a-key',
             mixin: 'a-mixin',
             useWhen: {
