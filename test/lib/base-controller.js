@@ -249,7 +249,7 @@ describe('lib/base-controller', () => {
       let callback;
 
       beforeEach(() => {
-        hmpoFormWizard.Controller.prototype.getValues = sinon.stub();
+        hmpoFormWizard.Controller.prototype.getValues = sinon.stub().yields();
         Controller.prototype.getErrorLength = sinon.stub();
         req = {
           sessionModel: {
@@ -322,6 +322,31 @@ describe('lib/base-controller', () => {
           req.sessionModel.reset.should.have.been.calledOnce;
         });
 
+        it('resets the session before callback is called', () => {
+          req.sessionModel.reset.should.have.been.calledBefore(callback);
+        });
+
+      });
+
+      describe('when parent controller getValues errors', () => {
+
+        let error;
+
+        beforeEach(() => {
+          error = 'Parent getValues error.';
+          hmpoFormWizard.Controller.prototype.getValues = sinon.stub().yields(error);
+          controller = new Controller({template: 'foo'});
+          controller.options = {
+            clearSession: true
+          };
+          controller.getValues(req, res, callback);
+        });
+
+        it('immediately fires the callback with the error', () => {
+          callback.should.have.been.calledWith(error);
+          req.sessionModel.reset.should.not.have.been.called;
+        });
+
       });
 
       it('always calls the parent controller getValues', () => {
@@ -329,7 +354,7 @@ describe('lib/base-controller', () => {
         controller.options = {};
         controller.getValues(req, res, callback);
         hmpoFormWizard.Controller.prototype.getValues
-          .should.always.have.been.calledWithExactly(req, res, callback);
+          .should.always.have.been.calledWith(req, res);
       });
 
     });
