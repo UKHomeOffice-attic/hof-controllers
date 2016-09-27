@@ -662,7 +662,13 @@ describe('lib/base-controller', () => {
       describe('when the action is "edit" and the parent redirect is not edit', () => {
         it('appends "edit" to the path', () => {
           req.params.action = 'edit';
-          controller.getErrorStep(err, req).should.contain('/edit');
+          controller.getErrorStep(err, req).should.match(/\/edit$/);
+        });
+
+        it('doesn\'t append "edit" to the path if "edit" is already present', () => {
+          req.params.action = 'edit';
+          hmpoFormWizard.Controller.prototype.getErrorStep.returns('/a-path/edit/id');
+          controller.getErrorStep(err, req).should.not.match(/\/edit$/);
         });
       });
 
