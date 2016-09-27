@@ -16,7 +16,7 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
-    "hmpo-form-wizard": "^4.4.2",
+    "hmpo-form-wizard": "^5.1.1",
     "lodash": "^3.10.1",
     "moment": "^2.10.3",
     "moment-business": "^2.0.0"
