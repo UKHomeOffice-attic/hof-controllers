@@ -11,10 +11,13 @@ const ConfirmController = proxyquire('../../lib/confirm-controller', {
 
 describe('lib/confirm-controller', () => {
   const req = {
-    params: {}
+    params: {},
+    translate: function () {}
   };
   const res = {};
   let controller;
+
+  const modifierSpy = sinon.spy((value) => value * 3);
 
   beforeEach(() => {
     controller = new ConfirmController({
@@ -47,7 +50,10 @@ describe('lib/confirm-controller', () => {
             'field-three',
             'field-four'
           ]
-        }]
+        }],
+        modifiers: {
+          'field-two': modifierSpy
+        }
       }
     };
   });
@@ -95,6 +101,14 @@ describe('lib/confirm-controller', () => {
 
       it('should have set step: /one on the field object', () => {
         fields[0].should.have.property('step').and.equal('/one');
+      });
+
+      it('should use modifiers', () => {
+        fields[1].should.have.property('value').and.equal(6);
+      });
+
+      it('should call modifiers with the value of the field and the request', () => {
+        modifierSpy.should.have.been.calledWith(res.locals.values['field-two'], req);
       });
 
       it('should have set value 3 on the 3rd field object', () => {
