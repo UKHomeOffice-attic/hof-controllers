@@ -283,9 +283,9 @@ In step options
         'field-three'
       ]
     }],
-    modifiers: { // transform {{value}}, values hash provided
-      'field-two': function(values) {
-        return values['field-two'].toUpperCase();
+    modifiers: { // value of current field and req object provided
+      'field-two': function(value, req) {
+        return req.translate(`path.to.translations[${value}]`)
       }
     }
   }
