@@ -108,7 +108,7 @@ describe('lib/confirm-controller', () => {
       });
 
       it('passes raw value', () => {
-        fields[1].should.have.property('rawValue').and.equal(2);
+        fields[1].should.have.property('origValue').and.equal(2);
       });
 
       it('should call modifiers with the value of the field and the request', () => {
