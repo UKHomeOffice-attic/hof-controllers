@@ -296,7 +296,7 @@ In config page template
 
 ```html
 {{#tableSections}}
-  {{> partials-summary-table}} <!-- {{name}}, {{value}} and {{step}} are available in this scope -->
+  {{> partials-summary-table}} <!-- {{name}}, {{value}}, {{rawValue}} and {{step}} are available in this scope -->
 {{/tableSections}}
 ```
 
