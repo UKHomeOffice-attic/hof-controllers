@@ -50,6 +50,12 @@ describe('lib/confirm-controller', () => {
             'field-three',
             'field-four'
           ]
+        }, {
+          name: 'another-test',
+          fields: [
+            'field-five',
+            'field-six'
+          ]
         }],
         modifiers: {
           'field-two': modifierSpy
