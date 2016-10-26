@@ -257,7 +257,7 @@ util.inherits(DateController, Controller);
 
 ### Confirm Controller
 
-Extends the base controller's locals method to provide data in a format suitable for generating a summary table.
+Extends the base controller's locals method to provide data in a format suitable for generating a summary table and email.
 
 Accessed as `confirm` from `hof-controllers`.
 
@@ -274,21 +274,7 @@ In step options
 ```js
 '/confirm': {
   controller: require('hof-controllers').confirm,
-  config: {
-    tableSections: [{
-      name: 'section-one',
-      fields: [
-        'field-one',
-        'field-two',
-        'field-three'
-      ]
-    }],
-    modifiers: { // value of current field and req object provided
-      'field-two': function(value, req) {
-        return req.translate(`path.to.translations[${value}]`)
-      }
-    }
-  }
+  fieldsConfig: require('./path/to/fields/config')
 }
 ```
 
@@ -299,6 +285,16 @@ In config page template
   {{> partials-summary-table}} <!-- {{name}}, {{value}}, {{origValue}} and {{step}} are available in this scope -->
 {{/tableSections}}
 ```
+
+This assumes all steps containing fields have a `section` - `locals.section`, this is used to group fields in the confirm table and the email.
+
+#### Translations
+
+Translations will be looked up automatically if located at the correct path. For section headers this is `pages.{section}.summary` which falls back to `pages.{section}.header`.
+
+For fields the path is `fields.{field}.summary` which falls back firstly to `fields.{field}.label` then to `fields.{field}.legend`.
+
+If the lookup fails the the section id or the field id are used.
 
 ------------------------------
 
