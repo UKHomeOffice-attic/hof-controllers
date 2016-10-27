@@ -109,6 +109,23 @@ describe('Helpers', () => {
     });
   });
 
+  describe('conditionalTranslate()', () => {
+    it('returns undefined if the lookup fails', () => {
+      function translate(key) {
+        return key;
+      }
+      chai.expect(helpers.conditionalTranslate(translate, 'a-key')).to.be.undefined;
+    });
+
+    it('returns the return value of translate if different from the key', () => {
+      const result = 'something';
+      function translate() {
+        return result;
+      }
+      helpers.conditionalTranslate(translate, 'a-key').should.be.equal(result);
+    });
+  });
+
   describe('getTranslation()', () => {
     it('returns the key if lookup fails', () => {
       function translate(key) {

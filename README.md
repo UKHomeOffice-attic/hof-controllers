@@ -274,7 +274,9 @@ In step options
 ```js
 '/confirm': {
   controller: require('hof-controllers').confirm,
-  fieldsConfig: require('./path/to/fields/config')
+  fieldsConfig: require('./path/to/fields/config'),
+  emailConfig: require('../../config').email,
+  customerEmailField: 'email-address' // the id of the user's email address field
 }
 ```
 

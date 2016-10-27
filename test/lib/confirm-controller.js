@@ -10,14 +10,15 @@ describe('Confirm Controller', () => {
       this.options = options;
     }
   }
+  class EmailerStub {}
   let ConfirmController;
   let confirmController;
   let helpersStub;
-  let req = {};
-  let res = {};
 
   beforeEach(() => {
     StubController.prototype.locals = sinon.stub().returns({});
+    StubController.prototype.get = sinon.stub();
+    EmailerStub.prototype.sendEmails = sinon.stub().returns(new Promise(resolve => resolve()));
   });
 
   describe('with stubbed helpers', () => {
@@ -27,11 +28,13 @@ describe('Confirm Controller', () => {
         isEmptyValue: sinon.stub(),
         hasOptions: sinon.stub(),
         getValue: sinon.stub(),
+        conditionalTranslate: sinon.stub(),
         getTranslation: sinon.stub()
       };
       ConfirmController = proxyquire('../../lib/confirm-controller', {
         './base-controller': StubController,
-        './util/helpers': helpersStub
+        './util/helpers': helpersStub,
+        'hof-emailer': EmailerStub
       });
       const steps = {
         'step-1': {
@@ -89,8 +92,24 @@ describe('Confirm Controller', () => {
       confirmController.should.haveOwnProperty('options');
     });
 
+    it('has a formatData method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('formatData');
+    });
+
+    it('has a get method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('get');
+    });
+
     it('has a locals method', () => {
       ConfirmController.prototype.should.haveOwnProperty('locals');
+    });
+
+    it('has a getEmailerConfig method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('getEmailerConfig');
+    });
+
+    it('has a saveValues method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('saveValues');
     });
 
     describe('options object', () => {
@@ -104,8 +123,12 @@ describe('Confirm Controller', () => {
     });
 
     describe('public methods', () => {
-      describe('locals', () => {
+      let req = {};
+      let res = {};
+      let cb;
+      describe('formatData', () => {
         let result;
+        let translate;
         beforeEach(() => {
           const data = {
             'field-1': 'Field 1 Value',
@@ -114,10 +137,7 @@ describe('Confirm Controller', () => {
             'field-3': 'Field 3 Value',
             'field-4': 'Field 4 Value'
           };
-          req.translate = sinon.stub();
-          req.sessionModel = {
-            toJSON: sinon.stub().returns(data)
-          };
+          translate = sinon.stub();
           helpersStub.getTranslation
             .onCall(0).returns('Section 1')
             .onCall(1).returns('Field One')
@@ -132,7 +152,7 @@ describe('Confirm Controller', () => {
             .onCall(3).returns('step-3');
           helpersStub.isEmptyValue.returns(false)
             .withArgs(undefined).returns(true);
-          result = confirmController.locals(req, res).tableSections;
+          result = confirmController.formatData(data, translate);
         });
 
         it('is an array with 2 items', () => {
@@ -215,15 +235,154 @@ describe('Confirm Controller', () => {
           });
         });
       });
+
+      describe('get', () => {
+        const data = {
+          a: 'value'
+        };
+
+        beforeEach(() => {
+          req.sessionModel = {
+            toJSON: sinon.stub().returns(data)
+          };
+          req.translate = {};
+          sinon.stub(ConfirmController.prototype, 'formatData');
+        });
+
+        afterEach(() => {
+          ConfirmController.prototype.formatData.restore();
+        });
+
+        it('saves the return value of formatData to the instance', () => {
+          const result = {a: 'value'};
+          ConfirmController.prototype.formatData.returns(result);
+          confirmController.get(req, res, cb);
+          confirmController.formattedData.should.be.ok
+            .and.be.equal(result);
+        });
+
+        it('calls formatData with the data and translate function', () => {
+          confirmController.get(req, res, cb);
+          ConfirmController.prototype.formatData.should.have.been.calledOnce
+            .and.calledWithExactly(data, req.translate);
+        });
+
+        it('calls super', () => {
+          confirmController.get(req, res, cb);
+          StubController.prototype.get.should.have.been.calledOnce
+            .and.calledWithExactly(req, res, cb);
+        });
+      });
+
+      describe('locals', () => {
+        it('calls super', () => {
+          confirmController.locals(req, res);
+          StubController.prototype.locals.should.have.been.calledOnce
+            .and.calledWithExactly(req, res);
+        });
+
+        it('extends super.locals with rows', () => {
+          confirmController.formattedData = [{a: 'value'}, {b: 'another value'}];
+          StubController.prototype.locals.returns({root: 'value'});
+          confirmController.locals(req, res).should.be.deep.equal({
+            root: 'value',
+            rows: [{
+              a: 'value'
+            }, {
+              b: 'another value'
+            }]
+          });
+        });
+      });
+
+      describe('getEmailerConfig', () => {
+        beforeEach(() => {
+          req.sessionModel.get = sinon.stub().returns('sterling@archer.com');
+          confirmController.options = {
+            emailConfig: {
+              port: ''
+            }
+          };
+          confirmController.formattedData = {
+            a: 'value'
+          };
+          helpersStub.conditionalTranslate
+            .onCall(0).returns('subject')
+            .onCall(1).returns('customer-intro')
+            .onCall(2).returns('caseworker-intro')
+            .onCall(3).returns('customer-outro')
+            .onCall(4).returns('caseworker-outro');
+        });
+
+        it('extends the config from step with translated values', () => {
+          confirmController.getEmailerConfig(req).should.be.deep.equal({
+            port: '',
+            data: {
+              a: 'value'
+            },
+            subject: 'subject',
+            customerIntro: 'customer-intro',
+            caseworkerIntro: 'caseworker-intro',
+            customerOutro: 'customer-outro',
+            caseworkerOutro: 'caseworker-outro',
+            customerEmail: 'sterling@archer.com'
+          });
+        });
+
+        it('doesn\'t include customerEmail if emailUser is false', () => {
+          confirmController.options.emailUser = false;
+          confirmController.getEmailerConfig(req).should.not.have.property('customerEmail');
+        });
+      });
+
+      describe('saveValues', () => {
+        beforeEach(() => {
+          cb = sinon.stub();
+          sinon.stub(ConfirmController.prototype, 'getEmailerConfig');
+        });
+
+        afterEach(() => {
+          ConfirmController.prototype.getEmailerConfig.restore();
+        });
+
+        it('calls getEmailerConfig with request object', () => {
+          confirmController.saveValues(req, res, cb);
+          ConfirmController.prototype.getEmailerConfig.should.have.been.calledOnce
+            .and.calledWithExactly(req);
+        });
+
+        it('calls emailer.sendEmails', () => {
+          confirmController.saveValues(req, res, cb);
+          EmailerStub.prototype.sendEmails.should.have.been.calledOnce
+            .and.calledWithExactly();
+        });
+
+        it('calls callback with no args on success', done => {
+          confirmController.saveValues(req, res, err => {
+            chai.expect(err).to.be.undefined;
+            done();
+          });
+        });
+
+        it('calls callback with err on error', done => {
+          const error = new Error('oops');
+          EmailerStub.prototype.sendEmails.returns(new Promise((resolve, reject) => reject(error)));
+          confirmController.saveValues(req, res, err => {
+            err.should.be.equal(error);
+            done();
+          });
+        });
+      });
     });
   });
 
   describe('without stubbed helpers', () => {
+    let translate;
     beforeEach(done => {
       const i18n = i18nFuture({
         path: `${path.resolve(__dirname, '../fixtures/translations/')}/__lng__/__ns__.json`
       }).on('ready', () => {
-        req.translate = i18n.translate.bind(i18n);
+        translate = i18n.translate.bind(i18n);
         done();
       });
       ConfirmController = proxyquire('../../lib/confirm-controller', {
@@ -233,14 +392,13 @@ describe('Confirm Controller', () => {
         steps: require('../fixtures/steps'),
         fieldsConfig: require('../fixtures/fields')
       });
-      req.sessionModel = {
-        toJSON: sinon.stub().returns(require('../fixtures/data'))
-      };
     });
 
-    it('contains data formatted correctly', () => {
-      confirmController.locals(req, res).tableSections
-        .should.be.deep.equal(require('../fixtures/output'));
+    describe('formatData', () => {
+      it('contains data formatted correctly', () => {
+        confirmController.formatData(require('../fixtures/data'), translate)
+          .should.be.deep.equal(require('../fixtures/output'));
+      });
     });
   });
 });
