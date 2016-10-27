@@ -19,6 +19,11 @@ describe('Confirm Controller', () => {
     StubController.prototype.locals = sinon.stub().returns({});
     StubController.prototype.get = sinon.stub();
     EmailerStub.prototype.sendEmails = sinon.stub().returns(new Promise(resolve => resolve()));
+    /* eslint-disable no-underscore-dangle */
+    EmailerStub.prototype._initApp = sinon.stub();
+    EmailerStub.prototype._initEmailer = sinon.stub();
+    EmailerStub.prototype._includeDate = sinon.stub();
+    /* eslint-enable no-underscore-dangle */
   });
 
   describe('with stubbed helpers', () => {
@@ -386,7 +391,8 @@ describe('Confirm Controller', () => {
         done();
       });
       ConfirmController = proxyquire('../../lib/confirm-controller', {
-        './base-controller': StubController
+        './base-controller': StubController,
+        'hof-emailer': EmailerStub
       });
       confirmController = new ConfirmController({
         steps: require('../fixtures/steps'),

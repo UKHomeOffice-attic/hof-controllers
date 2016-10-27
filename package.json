@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "hmpo-form-wizard": "https://github.com/UKHomeOffice/passports-form-wizard.git#so-master",
+    "hof-emailer": "^1.0.0",
     "lodash": "4.16.3",
     "moment": "2.15.1"
   },
