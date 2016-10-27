@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "hmpo-form-wizard": "https://github.com/UKHomeOffice/passports-form-wizard.git#so-master",
+    "hof-emailer": "^1.0.0",
     "lodash": "4.16.3",
     "moment": "2.15.1"
   },
@@ -28,6 +29,7 @@
     "eslint-plugin-filenames": "^0.1.1",
     "eslint-plugin-mocha": "^0.2.2",
     "eslint-plugin-one-variable-per-var": "0.0.3",
+    "i18n-future": "^1.0.0",
     "jscs": "^1.13.1",
     "mocha": "^2.2.5",
     "mocha-junit-reporter": "^1.4.0",
