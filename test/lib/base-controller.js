@@ -16,8 +16,8 @@ describe('lib/base-controller', () => {
   describe('constructor', () => {
 
     beforeEach(() => {
-      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function () {
-        this.options = {};
+      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function (options) {
+        this.options = options;
       });
       hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
@@ -27,7 +27,9 @@ describe('lib/base-controller', () => {
     });
 
     it('calls the parent constructor', () => {
-      controller = new Controller({template: 'foo'});
+      controller = new Controller({
+        template: 'foo'
+      });
       hmpoFormWizard.Controller.should.have.been.called;
     });
 
@@ -38,7 +40,10 @@ describe('lib/base-controller', () => {
     beforeEach(() => {
       hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard
+        'hmpo-form-wizard': hmpoFormWizard,
+        'i18n-lookup': function() {
+          return function () {};
+        }
       });
     });
 
@@ -146,7 +151,8 @@ describe('lib/base-controller', () => {
         sinon.stub(Controller.prototype, 'getErrorLength');
         Controller.prototype.getErrorLength.returns({single: true});
         controller = new Controller({
-          template: 'foo'
+          template: 'foo',
+          route: '/bar'
         });
       });
 
@@ -231,7 +237,8 @@ describe('lib/base-controller', () => {
             },
             locals: {
               test: 'bar',
-            }
+            },
+            route: '/baz'
           };
         });
 
