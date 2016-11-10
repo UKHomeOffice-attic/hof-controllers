@@ -59,6 +59,12 @@ Or override in step options
 
 Adds `single` or `multiple` to the locals to describe the number of errors for pluralisation of error messages.
 
+#### Locals for page info
+
+* Exposes `route` name to template (without preceding slash)
+* Exposes `title` to template if found in translations. Looked up in the order:  `pages.{route}.title -> fields.{firstFieldName}.label -> fields.{firstFieldName}.legend`.
+* Exposes `intro` to template if found in translations at `pages.{route}.intro`
+
 #### Exposes meta to templates
 
 Add a locals object to step config to expose configurable key/value pairs in the template. Useful for generating template partials programmatically. These will override any locals provided further up the tree.

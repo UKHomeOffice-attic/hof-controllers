@@ -1,8 +1,23 @@
 'use strict';
 
-const helpers = require('../../../lib/util/helpers');
+const proxyquire = require('proxyquire');
 
 describe('Helpers', () => {
+  let helpers;
+  let hoganStub;
+  let renderStub;
+  beforeEach(() => {
+    renderStub = sinon.stub();
+    hoganStub = {
+      compile: sinon.stub().returns({
+        render: renderStub
+      })
+    };
+    helpers = proxyquire('../../../lib/util/helpers', {
+      'hogan.js': hoganStub
+    });
+  });
+
   describe('getStepFromFieldName()', () => {
     let steps;
     beforeEach(() => {
@@ -58,6 +73,54 @@ describe('Helpers', () => {
 
     it('returns false when called with false', () => {
       helpers.isEmptyValue(false).should.be.false;
+    });
+  });
+
+  describe('getTitle()', () => {
+    let lookup;
+    let fields;
+    beforeEach(() => {
+      lookup = sinon.stub();
+      fields = {
+        'field-one': {}
+      };
+    });
+
+    it('calls lookup with the correct list of keys', () => {
+      const expected = [
+        'pages.step-one.header',
+        'fields.field-one.label',
+        'fields.field-one.legend'
+      ];
+      helpers.getTitle('step-one', lookup, fields);
+      lookup.firstCall.args[0].should.be.deep.equal(expected);
+    });
+
+    it('passes the locals hash to lookup as second arg', () => {
+      const locals = {};
+      helpers.getTitle('step-one', lookup, fields, locals);
+      lookup.firstCall.args[1].should.be.equal(locals);
+    });
+  });
+
+  describe('getIntro()', () => {
+    let lookup;
+    beforeEach(() => {
+      lookup = sinon.stub();
+    });
+
+    it('calls lookup with the correct list of keys', () => {
+      const expected = [
+        'pages.step-one.intro'
+      ];
+      helpers.getIntro('step-one', lookup);
+      lookup.firstCall.args[0].should.be.deep.equal(expected);
+    });
+
+    it('passes locals too lookup as second arg', () => {
+      const locals = {};
+      helpers.getIntro('step-one', lookup, locals);
+      lookup.firstCall.args[1].should.be.equal(locals);
     });
   });
 
