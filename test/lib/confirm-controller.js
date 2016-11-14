@@ -1,126 +1,409 @@
 'use strict';
 
+const path = require('path');
 const proxyquire = require('proxyquire');
+const i18nFuture = require('i18n-future');
 
-const Controller = sinon.stub();
-Controller.prototype = {};
-
-const ConfirmController = proxyquire('../../lib/confirm-controller', {
-  './base-controller': Controller
-});
-
-describe('lib/confirm-controller', () => {
-  const req = {
-    params: {},
-    translate: function () {}
-  };
-  const res = {};
-  let controller;
-
-  const modifierSpy = sinon.spy((value) => value * 3);
+describe('Confirm Controller', () => {
+  class StubController {
+    constructor(options) {
+      this.options = options;
+    }
+  }
+  class EmailerStub {}
+  let ConfirmController;
+  let confirmController;
+  let helpersStub;
 
   beforeEach(() => {
-    controller = new ConfirmController({
-      template: 'foo'
-    });
-    controller.getErrors = sinon.stub().returns({foo: true});
-    res.locals = {};
-    res.locals.values = {
-      'field-one': 1,
-      'field-two': 2,
-      'field-three': 3,
-      'field-four': 4
-    };
-
-    controller.options = {
-      steps: {
-        '/one': {
-          fields: ['field-one', 'field-two']
-        },
-        '/two': {
-          fields: ['field-three', 'field-four']
-        }
-      },
-      config: {
-        tableSections: [{
-          name: 'test',
-          fields: [
-            'field-one',
-            'field-two',
-            'field-three',
-            'field-four'
-          ]
-        }],
-        modifiers: {
-          'field-two': modifierSpy
-        }
-      }
-    };
+    StubController.prototype.locals = sinon.stub().returns({});
+    StubController.prototype.get = sinon.stub();
+    EmailerStub.prototype.sendEmails = sinon.stub().returns(new Promise(resolve => resolve()));
+    /* eslint-disable no-underscore-dangle */
+    EmailerStub.prototype._initApp = sinon.stub();
+    EmailerStub.prototype._initEmailer = sinon.stub();
+    EmailerStub.prototype._includeDate = sinon.stub();
+    /* eslint-enable no-underscore-dangle */
   });
 
-  describe('tableSections', () => {
-    let locals;
-
+  describe('with stubbed helpers', () => {
     beforeEach(() => {
-      locals = controller.locals(req, res);
+      helpersStub = {
+        getStepFromFieldName: sinon.stub(),
+        isEmptyValue: sinon.stub(),
+        hasOptions: sinon.stub(),
+        getValue: sinon.stub(),
+        conditionalTranslate: sinon.stub(),
+        getTranslation: sinon.stub()
+      };
+      ConfirmController = proxyquire('../../lib/confirm-controller', {
+        './base-controller': StubController,
+        './util/helpers': helpersStub,
+        'hof-emailer': EmailerStub
+      });
+      const steps = {
+        'step-1': {
+          fields: [
+            'field-1'
+          ],
+          locals: {
+            section: 'section-1'
+          }
+        },
+        'step-2': {
+          fields: [
+            'field-2',
+            'field-x'
+          ],
+          locals: {
+            section: 'section-1'
+          }
+        },
+        'step-3': {
+          fields: [
+            'field-3',
+            'field-4'
+          ],
+          locals: {
+            section: 'section-2'
+          }
+        },
+        'step-4': {
+          fields: [
+            'field-5',
+            'field-6'
+          ],
+          locals: {
+            section: 'section-2'
+          }
+        }
+      };
+      const fieldsConfig = {
+        'field-1': {},
+        'field-2': {},
+        'field-x': {},
+        'field-3': {},
+        'field-4': {
+          includeInSummary: false
+        }
+      };
+      confirmController = new ConfirmController({
+        steps,
+        fieldsConfig,
+      });
     });
 
-    it('should have exposed a tableSections array', () => {
-      locals.should.have.property('tableSections').and.be.an.instanceOf(Array);
+    it('has an options object', () => {
+      confirmController.should.haveOwnProperty('options');
     });
 
-    it('should have 1 section', () => {
-      locals.tableSections.length.should.be.equal(1);
+    it('has a formatData method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('formatData');
     });
 
-    it('should have a fields array', () => {
-      locals.tableSections[0].should.have.property('fields').and.be.an.instanceOf(Array);
+    it('has a get method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('get');
     });
 
-    describe('fields', () => {
-      let fields;
+    it('has a locals method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('locals');
+    });
 
-      beforeEach(() => {
-        fields = locals.tableSections[0].fields;
+    it('has a getEmailerConfig method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('getEmailerConfig');
+    });
+
+    it('has a saveValues method', () => {
+      ConfirmController.prototype.should.haveOwnProperty('saveValues');
+    });
+
+    describe('options object', () => {
+      it('has a steps object', () => {
+        confirmController.options.should.haveOwnProperty('steps');
       });
 
-      it('should have 4 items', () => {
-        fields.length.should.be.equal(4);
+      it('has a fieldsConfig object', () => {
+        confirmController.options.should.haveOwnProperty('fieldsConfig');
+      });
+    });
+
+    describe('public methods', () => {
+      let req = {};
+      let res = {};
+      let cb;
+      describe('formatData', () => {
+        let result;
+        let translate;
+        beforeEach(() => {
+          const data = {
+            'field-1': 'Field 1 Value',
+            'field-2': 'Field 2 Value',
+            'field-x': 'Field x Value',
+            'field-3': 'Field 3 Value',
+            'field-4': 'Field 4 Value'
+          };
+          translate = sinon.stub();
+          helpersStub.getTranslation
+            .onCall(0).returns('Section 1')
+            .onCall(1).returns('Field One')
+            .onCall(2).returns('Field Two')
+            .onCall(3).returns('Field X')
+            .onCall(4).returns('Section 2')
+            .onCall(5).returns('Field 3');
+          helpersStub.getStepFromFieldName
+            .onCall(0).returns('step-1')
+            .onCall(1).returns('step-2')
+            .onCall(2).returns('step-2')
+            .onCall(3).returns('step-3');
+          helpersStub.isEmptyValue.returns(false)
+            .withArgs(undefined).returns(true);
+          result = confirmController.formatData(data, translate);
+        });
+
+        it('is an array with 2 items', () => {
+          result.should.be.an('array')
+            .and.have.property('length')
+            .and.be.equal(2);
+        });
+
+        describe('first section', () => {
+          beforeEach(() => {
+            result = result[0];
+          });
+
+          it('has a section property set to Section 1', () => {
+            result.should.have.property('section')
+              .and.be.equal('Section 1');
+          });
+
+          it('has 3 fields', () => {
+            result.should.have.property('fields')
+              .and.have.property('length')
+              .and.be.equal(3);
+          });
+
+          describe('fields', () => {
+            beforeEach(() => {
+              result = result.fields;
+            });
+
+            it('should contain the correct fields', () => {
+              result.should.deep.equal([{
+                field: 'field-1',
+                label: 'Field One',
+                step: 'step-1',
+                value: 'Field 1 Value'
+              }, {
+                field: 'field-2',
+                label: 'Field Two',
+                step: 'step-2',
+                value: 'Field 2 Value'
+              }, {
+                field: 'field-x',
+                label: 'Field X',
+                step: 'step-2',
+                value: 'Field x Value'
+              }]);
+            });
+          });
+        });
+
+        describe('second section', () => {
+          beforeEach(() => {
+            result = result[1];
+          });
+
+          it('has a section property set to Section 2', () => {
+            result.should.have.property('section')
+              .and.be.equal('Section 2');
+          });
+
+          it('has 1 field', () => {
+            result.should.have.property('fields')
+              .and.have.property('length')
+              .and.be.equal(1);
+          });
+
+          describe('fields', () => {
+            beforeEach(() => {
+              result = result.fields;
+            });
+
+            it('should contain the correct fields', () => {
+              result.should.deep.equal([{
+                field: 'field-3',
+                label: 'Field 3',
+                step: 'step-3',
+                value: 'Field 3 Value'
+              }]);
+            });
+          });
+        });
       });
 
-      it('should contain objects', () => {
-        fields[0].should.be.an.instanceOf(Object);
-        fields[1].should.be.an.instanceOf(Object);
-        fields[2].should.be.an.instanceOf(Object);
-        fields[3].should.be.an.instanceOf(Object);
+      describe('get', () => {
+        const data = {
+          a: 'value'
+        };
+
+        beforeEach(() => {
+          req.sessionModel = {
+            toJSON: sinon.stub().returns(data)
+          };
+          req.translate = {};
+          sinon.stub(ConfirmController.prototype, 'formatData');
+        });
+
+        afterEach(() => {
+          ConfirmController.prototype.formatData.restore();
+        });
+
+        it('saves the return value of formatData to the instance', () => {
+          const result = {a: 'value'};
+          ConfirmController.prototype.formatData.returns(result);
+          confirmController.get(req, res, cb);
+          confirmController.formattedData.should.be.ok
+            .and.be.equal(result);
+        });
+
+        it('calls formatData with the data and translate function', () => {
+          confirmController.get(req, res, cb);
+          ConfirmController.prototype.formatData.should.have.been.calledOnce
+            .and.calledWithExactly(data, req.translate);
+        });
+
+        it('calls super', () => {
+          confirmController.get(req, res, cb);
+          StubController.prototype.get.should.have.been.calledOnce
+            .and.calledWithExactly(req, res, cb);
+        });
       });
 
-      it('should have set value: 1 on the field object', () => {
-        fields[0].should.have.property('value').and.equal(1);
+      describe('locals', () => {
+        it('calls super', () => {
+          confirmController.locals(req, res);
+          StubController.prototype.locals.should.have.been.calledOnce
+            .and.calledWithExactly(req, res);
+        });
+
+        it('extends super.locals with rows', () => {
+          confirmController.formattedData = [{a: 'value'}, {b: 'another value'}];
+          StubController.prototype.locals.returns({root: 'value'});
+          confirmController.locals(req, res).should.be.deep.equal({
+            root: 'value',
+            rows: [{
+              a: 'value'
+            }, {
+              b: 'another value'
+            }]
+          });
+        });
       });
 
-      it('should have set step: /one on the field object', () => {
-        fields[0].should.have.property('step').and.equal('/one');
+      describe('getEmailerConfig', () => {
+        beforeEach(() => {
+          req.sessionModel.get = sinon.stub().returns('sterling@archer.com');
+          confirmController.options = {
+            emailConfig: {
+              port: ''
+            }
+          };
+          confirmController.formattedData = {
+            a: 'value'
+          };
+          helpersStub.conditionalTranslate
+            .onCall(0).returns('subject')
+            .onCall(1).returns('customer-intro')
+            .onCall(2).returns('caseworker-intro')
+            .onCall(3).returns('customer-outro')
+            .onCall(4).returns('caseworker-outro');
+        });
+
+        it('extends the config from step with translated values', () => {
+          confirmController.getEmailerConfig(req).should.be.deep.equal({
+            port: '',
+            data: {
+              a: 'value'
+            },
+            subject: 'subject',
+            customerIntro: 'customer-intro',
+            caseworkerIntro: 'caseworker-intro',
+            customerOutro: 'customer-outro',
+            caseworkerOutro: 'caseworker-outro',
+            customerEmail: 'sterling@archer.com'
+          });
+        });
+
+        it('doesn\'t include customerEmail if emailUser is false', () => {
+          confirmController.options.emailUser = false;
+          confirmController.getEmailerConfig(req).should.not.have.property('customerEmail');
+        });
       });
 
-      it('should use modifiers', () => {
-        fields[1].should.have.property('value').and.equal(6);
-      });
+      describe('saveValues', () => {
+        beforeEach(() => {
+          cb = sinon.stub();
+          sinon.stub(ConfirmController.prototype, 'getEmailerConfig');
+        });
 
-      it('passes raw value', () => {
-        fields[1].should.have.property('origValue').and.equal(2);
-      });
+        afterEach(() => {
+          ConfirmController.prototype.getEmailerConfig.restore();
+        });
 
-      it('should call modifiers with the value of the field and the request', () => {
-        modifierSpy.should.have.been.calledWith(res.locals.values['field-two'], req);
-      });
+        it('calls getEmailerConfig with request object', () => {
+          confirmController.saveValues(req, res, cb);
+          ConfirmController.prototype.getEmailerConfig.should.have.been.calledOnce
+            .and.calledWithExactly(req);
+        });
 
-      it('should have set value 3 on the 3rd field object', () => {
-        fields[2].should.have.property('value').and.equal(3);
-      });
+        it('calls emailer.sendEmails', () => {
+          confirmController.saveValues(req, res, cb);
+          EmailerStub.prototype.sendEmails.should.have.been.calledOnce
+            .and.calledWithExactly();
+        });
 
-      it('should have set step: /two on the 3rd field object', () => {
-        fields[3].should.have.property('step').and.equal('/two');
+        it('calls callback with no args on success', done => {
+          confirmController.saveValues(req, res, err => {
+            chai.expect(err).to.be.undefined;
+            done();
+          });
+        });
+
+        it('calls callback with err on error', done => {
+          const error = new Error('oops');
+          EmailerStub.prototype.sendEmails.returns(new Promise((resolve, reject) => reject(error)));
+          confirmController.saveValues(req, res, err => {
+            err.should.be.equal(error);
+            done();
+          });
+        });
+      });
+    });
+  });
+
+  describe('without stubbed helpers', () => {
+    let translate;
+    beforeEach(done => {
+      const i18n = i18nFuture({
+        path: `${path.resolve(__dirname, '../fixtures/translations/')}/__lng__/__ns__.json`
+      }).on('ready', () => {
+        translate = i18n.translate.bind(i18n);
+        done();
+      });
+      ConfirmController = proxyquire('../../lib/confirm-controller', {
+        './base-controller': StubController,
+        'hof-emailer': EmailerStub
+      });
+      confirmController = new ConfirmController({
+        steps: require('../fixtures/steps'),
+        fieldsConfig: require('../fixtures/fields')
+      });
+    });
+
+    describe('formatData', () => {
+      it('contains data formatted correctly', () => {
+        confirmController.formatData(require('../fixtures/data'), translate)
+          .should.be.deep.equal(require('../fixtures/output'));
       });
     });
   });
