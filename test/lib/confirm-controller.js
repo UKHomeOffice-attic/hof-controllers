@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const path = require('path');
 const proxyquire = require('proxyquire');
 const i18nFuture = require('i18n-future');
@@ -54,6 +55,14 @@ describe('Confirm Controller', () => {
           fields: [
             'field-2',
             'field-x'
+          ],
+          locals: {
+            section: 'section-1'
+          }
+        },
+        'step-2a': {
+          fields: [
+            'field-2'
           ],
           locals: {
             section: 'section-1'
@@ -180,6 +189,10 @@ describe('Confirm Controller', () => {
             result.should.have.property('fields')
               .and.have.property('length')
               .and.be.equal(3);
+          });
+
+          it('doesn\'t contain any duplicate fields', () => {
+            _.uniq(result.fields).should.be.deep.equal(result.fields);
           });
 
           describe('fields', () => {

@@ -51,6 +51,14 @@ module.exports = {
       section: 'enquiry-details'
     }
   },
+  '/additional-2': {
+    fields: [
+      'additional-names'
+    ],
+    locals: {
+      section: 'enquiry-details'
+    }
+  },
   '/how': {
     fields: [
       'how-radio',
