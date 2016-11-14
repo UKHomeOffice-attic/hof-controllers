@@ -53,7 +53,7 @@ module.exports = {
   },
   '/additional-2': {
     fields: [
-      'additions-names'
+      'additional-names'
     ],
     locals: {
       section: 'enquiry-details'
