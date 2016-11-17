@@ -1,6 +1,9 @@
 'use strict';
 
+const steps = require('./steps');
+
 module.exports = {
+  steps: Object.keys(steps),
   'about-radio': 'wrong-certificate',
   'additional-names': 'Additional Names',
   'additional-text': 'Some additional text',
