@@ -19,20 +19,22 @@ describe('Helpers', () => {
   });
 
   describe('getStepFromFieldName()', () => {
-    let steps;
+    let stepsConfig;
     beforeEach(() => {
-      steps = {
+      stepsConfig = {
         '/step-1': {
           fields: [
             'field-1',
             'field-2',
-            'field-3'
+            'field-3',
+            'field-7'
           ]
         },
         '/step-2': {
           fields: [
             'field-4',
-            'field-5'
+            'field-5',
+            'field-7'
           ]
         },
         '/step-3': {
@@ -44,13 +46,18 @@ describe('Helpers', () => {
     });
 
     it('returns the name of the step the field is found in', () => {
-      helpers.getStepFromFieldName('field-3', steps).should.be.equal('/step-1');
-      helpers.getStepFromFieldName('field-5', steps).should.be.equal('/step-2');
-      helpers.getStepFromFieldName('field-6', steps).should.be.equal('/step-3');
+      const stepsJourney = ['/step-1', '/step-2', '/step-3'];
+      helpers.getStepFromFieldName('field-3', stepsConfig, stepsJourney).should.be.equal('/step-1');
+      helpers.getStepFromFieldName('field-5', stepsConfig, stepsJourney).should.be.equal('/step-2');
+      helpers.getStepFromFieldName('field-6', stepsConfig, stepsJourney).should.be.equal('/step-3');
+    });
+
+    it('returns the step from the stepsJourney if a field is on multiple steps', () => {
+      helpers.getStepFromFieldName('field-7', stepsConfig, ['/step-1']).should.be.equal('/step-1');
     });
 
     it('returns undefined on failed lookup', () => {
-      chai.expect(helpers.getStepFromFieldName('field-7', steps)).to.be.undefined;
+      chai.expect(helpers.getStepFromFieldName('field-7', stepsConfig)).to.be.undefined;
     });
   });
 
