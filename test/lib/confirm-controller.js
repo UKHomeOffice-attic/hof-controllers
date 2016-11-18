@@ -19,7 +19,7 @@ describe('Confirm Controller', () => {
   beforeEach(() => {
     StubController.prototype.locals = sinon.stub().returns({});
     StubController.prototype.get = sinon.stub();
-    EmailerStub.prototype.sendEmails = sinon.stub().returns(new Promise(resolve => resolve()));
+    EmailerStub.prototype.sendEmails = sinon.stub().returns(Promise.resolve());
     /* eslint-disable no-underscore-dangle */
     EmailerStub.prototype._initApp = sinon.stub();
     EmailerStub.prototype._initEmailer = sinon.stub();
@@ -390,7 +390,7 @@ describe('Confirm Controller', () => {
 
         it('calls callback with err on error', done => {
           const error = new Error('oops');
-          EmailerStub.prototype.sendEmails.returns(new Promise((resolve, reject) => reject(error)));
+          EmailerStub.prototype.sendEmails.returns(Promise.reject(error));
           confirmController.saveValues(req, res, err => {
             err.should.be.equal(error);
             done();
