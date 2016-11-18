@@ -316,6 +316,7 @@ describe('Confirm Controller', () => {
       describe('getEmailerConfig', () => {
         beforeEach(() => {
           req.sessionModel.get = sinon.stub().returns('sterling@archer.com');
+          req.rawTranslate = sinon.stub();
           confirmController.options = {
             emailConfig: {
               port: ''
@@ -345,6 +346,11 @@ describe('Confirm Controller', () => {
             caseworkerOutro: 'caseworker-outro',
             customerEmail: 'sterling@archer.com'
           });
+        });
+
+        it('passes rawTranslate when translating subject', () => {
+          confirmController.getEmailerConfig(req);
+          helpersStub.conditionalTranslate.firstCall.should.have.been.calledWith(req.rawTranslate);
         });
 
         it('doesn\'t include customerEmail if emailUser is false', () => {
