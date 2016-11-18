@@ -197,68 +197,36 @@ describe('Helpers', () => {
   });
 
   describe('getTranslation()', () => {
-    it('returns the key if lookup fails', () => {
-      function translate(key) {
-        return key;
-      }
-      helpers.getTranslation(translate, 'a-key').should.be.equal('a-key');
+    let lookup;
+    beforeEach(() => {
+      lookup = sinon.stub();
     });
-  });
 
-  it('returns the summary value for page if it exists', () => {
-    function translate(key) {
-      if (key === 'pages.page.summary') {
-        return 'summary';
-      }
-    }
-    helpers.getTranslation(translate, 'page').should.be.equal('summary');
-  });
+    it('calls lookup with the correct keys if not a field', () => {
+      helpers.getTranslation(lookup, 'a-key');
+      lookup.should.have.been.calledWith([
+        'pages.a-key.summary',
+        'pages.a-key.header'
+      ]);
+    });
 
-  it('returns the header value for page if summary lookup fails', () => {
-    function translate(key) {
-      if (key === 'pages.page.summary') {
-        return 'pages.page.summary';
-      }
-      if (key === 'pages.page.header') {
-        return 'header';
-      }
-    }
-    helpers.getTranslation(translate, 'page').should.be.equal('header');
-  });
+    it('returns the key if lookup fails', () => {
+      lookup.returns(null);
+      helpers.getTranslation(lookup, 'a-key').should.be.equal('a-key');
+    });
 
-  it('returns the summary value for a field if exists', () => {
-    function translate(key) {
-      if (key === 'fields.field.summary') {
-        return 'summary';
-      }
-    }
-    helpers.getTranslation(translate, 'field', true).should.be.equal('summary');
-  });
+    it('calls lookup with the correct keys if a field', () => {
+      helpers.getTranslation(lookup, 'a-key', true);
+      lookup.should.have.been.calledWith([
+        'fields.a-key.summary',
+        'fields.a-key.label',
+        'fields.a-key.legend'
+      ]);
+    });
 
-  it('returns the label value for field if summary lookup fails', () => {
-    function translate(key) {
-      if (key === 'fields.field.summary') {
-        return 'fields.field.summary';
-      }
-      if (key === 'fields.field.label') {
-        return 'label';
-      }
-    }
-    helpers.getTranslation(translate, 'field', true).should.be.equal('label');
-  });
-
-  it('returns the legend value for field if summary and label lookups fail', () => {
-    function translate(key) {
-      if (key === 'fields.field.summary') {
-        return 'fields.field.summary';
-      }
-      if (key === 'fields.field.label') {
-        return 'fields.field.label';
-      }
-      if (key === 'fields.field.legend') {
-        return 'legend';
-      }
-    }
-    helpers.getTranslation(translate, 'field', true).should.be.equal('legend');
+    it('returns the key if lookup fails', () => {
+      lookup.returns(null);
+      helpers.getTranslation(lookup, 'a-key', true).should.be.equal('a-key');
+    });
   });
 });
