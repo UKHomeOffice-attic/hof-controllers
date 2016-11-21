@@ -289,9 +289,9 @@ In step options
 In config page template
 
 ```html
-{{#tableSections}}
+{{#rows}}
   {{> partials-summary-table}} <!-- {{name}}, {{value}}, {{origValue}} and {{step}} are available in this scope -->
-{{/tableSections}}
+{{/rows}}
 ```
 
 This assumes all steps containing fields have a `section` - `locals.section`, this is used to group fields in the confirm table and the email.
