@@ -16,7 +16,7 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
-    "hof-form-wizard": "^1.0.0",
+    "hof-form-wizard": "^1.0.2",
     "hof-emailer": "^1.0.0",
     "i18n-lookup": "^0.1.0",
     "lodash": "4.16.3",

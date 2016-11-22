@@ -5,23 +5,23 @@ const proxyquire = require('proxyquire');
 
 describe('lib/base-controller', () => {
 
-  let hmpoFormWizard;
+  let hofFormWizard;
   let Controller;
   let controller;
 
   beforeEach(() => {
-    hmpoFormWizard = require('hmpo-form-wizard');
+    hofFormWizard = require('hof-form-wizard');
   });
 
   describe('constructor', () => {
 
     beforeEach(() => {
-      hmpoFormWizard.Controller = sinon.stub(hmpoFormWizard, 'Controller', function (options) {
+      hofFormWizard.Controller = sinon.stub(hofFormWizard, 'Controller', function (options) {
         this.options = options;
       });
-      hmpoFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
+      hofFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard,
+        'hof-form-wizard': hofFormWizard,
         './middleware/mixins': {}
       });
     });
@@ -30,7 +30,7 @@ describe('lib/base-controller', () => {
       controller = new Controller({
         template: 'foo'
       });
-      hmpoFormWizard.Controller.should.have.been.called;
+      hofFormWizard.Controller.should.have.been.called;
     });
 
   });
@@ -38,9 +38,9 @@ describe('lib/base-controller', () => {
   describe('methods', () => {
 
     beforeEach(() => {
-      hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub();
+      hofFormWizard.Controller.prototype.getNextStep = sinon.stub();
       Controller = proxyquire('../../lib/base-controller', {
-        'hmpo-form-wizard': hmpoFormWizard,
+        'hof-form-wizard': hofFormWizard,
         'i18n-lookup': function() {
           return function () {};
         }
@@ -59,7 +59,7 @@ describe('lib/base-controller', () => {
 
       beforeEach(() => {
         res.render = sinon.stub();
-        hmpoFormWizard.Controller.prototype.get = sinon.stub();
+        hofFormWizard.Controller.prototype.get = sinon.stub();
         controller = new Controller({
           template: 'foo'
         });
@@ -67,7 +67,7 @@ describe('lib/base-controller', () => {
 
       it('calls super', () => {
         controller.get(req, res, _.noop);
-        hmpoFormWizard.Controller.prototype.get.should.have.been.calledOnce
+        hofFormWizard.Controller.prototype.get.should.have.been.calledOnce
           .and.calledWithExactly(req, res, _.noop);
       });
 
@@ -256,7 +256,7 @@ describe('lib/base-controller', () => {
       let callback;
 
       beforeEach(() => {
-        hmpoFormWizard.Controller.prototype.getValues = sinon.stub().yields();
+        hofFormWizard.Controller.prototype.getValues = sinon.stub().yields();
         Controller.prototype.getErrorLength = sinon.stub();
         req = {
           sessionModel: {
@@ -341,7 +341,7 @@ describe('lib/base-controller', () => {
 
         beforeEach(() => {
           error = 'Parent getValues error.';
-          hmpoFormWizard.Controller.prototype.getValues = sinon.stub().yields(error);
+          hofFormWizard.Controller.prototype.getValues = sinon.stub().yields(error);
           controller = new Controller({template: 'foo'});
           controller.options = {
             clearSession: true
@@ -360,7 +360,7 @@ describe('lib/base-controller', () => {
         controller = new Controller({template: 'foo'});
         controller.options = {};
         controller.getValues(req, res, callback);
-        hmpoFormWizard.Controller.prototype.getValues
+        hofFormWizard.Controller.prototype.getValues
           .should.always.have.been.calledWith(req, res);
       });
 
@@ -373,7 +373,7 @@ describe('lib/base-controller', () => {
       beforeEach(() => {
         getStub = sinon.stub();
         getStub.returns(['/']);
-        hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
+        hofFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/');
         req.baseUrl = '';
         req.params = {};
         req.sessionModel = {
@@ -402,7 +402,7 @@ describe('lib/base-controller', () => {
 
       describe('when the action is "edit" and continueOnEdit is truthy', () => {
         it('appends "/edit" to the path if next page is not /confirm', () => {
-          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
+          hofFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/step');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
           getStub.returns(['/step']);
@@ -410,7 +410,7 @@ describe('lib/base-controller', () => {
         });
 
         it('doesn\'t append "/edit" to the path if next page is /confirm', () => {
-          hmpoFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/confirm');
+          hofFormWizard.Controller.prototype.getNextStep = sinon.stub().returns('/confirm');
           controller.options.continueOnEdit = true;
           req.params.action = 'edit';
           controller.getNextStep(req).should.not.contain('/edit');
@@ -425,7 +425,7 @@ describe('lib/base-controller', () => {
             get: getStub
           };
           req.form = {values: {}};
-          hmpoFormWizard.Controller.prototype.getNextStep.returns('/next-page');
+          hofFormWizard.Controller.prototype.getNextStep.returns('/next-page');
         });
 
         describe('when the condition config is met', () => {
@@ -661,7 +661,7 @@ describe('lib/base-controller', () => {
       const err = {};
 
       beforeEach(() => {
-        hmpoFormWizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
+        hofFormWizard.Controller.prototype.getErrorStep = sinon.stub().returns('/');
         req.params = {};
         controller = new Controller({template: 'foo'});
       });
@@ -674,7 +674,7 @@ describe('lib/base-controller', () => {
 
         it('doesn\'t append "edit" to the path if "edit" is already present', () => {
           req.params.action = 'edit';
-          hmpoFormWizard.Controller.prototype.getErrorStep.returns('/a-path/edit/id');
+          hofFormWizard.Controller.prototype.getErrorStep.returns('/a-path/edit/id');
           controller.getErrorStep(err, req).should.not.match(/\/edit$/);
         });
       });
