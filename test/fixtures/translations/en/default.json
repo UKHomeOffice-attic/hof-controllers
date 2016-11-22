@@ -1,0 +1,128 @@
+{
+  "fields": {
+    "about-radio": {
+      "summary": "About Radio",
+      "options": {
+        "wrong-certificate": {
+          "label": "Wrong Certificate Received"
+        }
+      }
+    },
+    "additional-names": {
+      "summary": "Additional Names"
+    },
+    "additional-text": {
+      "summary": "Additional Text"
+    },
+    "additional-radio": {
+      "summary": "Additional Radio",
+      "options": {
+        "yes": {
+          "label": "Yes"
+        }
+      }
+    },
+    "address-lookup": {
+      "summary": "Address Lookup"
+    },
+    "address-textarea": {
+      "summary": "Address Textarea"
+    },
+    "country-select": {
+      "summary": "Country Select"
+    },
+    "details-text": {
+      "summary": "Details Text"
+    },
+    "existing-radio": {
+      "summary": "Existing Radio",
+      "options": {
+        "no": {
+          "label": "No"
+        }
+      }
+    },
+    "previous-radio": {
+      "summary": "Previous Radio",
+      "options": {
+        "no": {
+          "label": "No"
+        }
+      }
+    },
+    "email-text": {
+      "summary": "Email Text"
+    },
+    "how-radio": {
+      "summary": "How Radio",
+      "options": {
+        "post": {
+          "label": "By Post"
+        }
+      }
+    },
+    "online-toggle-text": {
+      "summary": "Online Toggle Text"
+    },
+    "telephone-toggle-text": {
+      "summary": "Telephone Toggle Text"
+    },
+    "telephone-toggle-text-2": {
+      "summary": "Telephone Toggle Text 2"
+    },
+    "name-text": {
+      "summary": "Name Text"
+    },
+    "person-one": {
+      "summary": "Person One"
+    },
+    "person-two": {
+      "summary": "Person Two"
+    },
+    "person-text": {
+      "summary": "Person Text"
+    },
+    "postcode-code": {
+      "summary": "Postcode Code"
+    },
+    "type-radio": {
+      "summary": "Type Radio",
+      "options": {
+        "birth": {
+          "label": "Birth Certificate"
+        }
+      }
+    },
+    "when-date": {
+      "summary": "When Date"
+    },
+    "when-date-day": {
+      "summary": "When Date Day"
+    },
+    "when-date-month": {
+      "summary": "When Date Month"
+    },
+    "when-date-year": {
+      "summary": "When Date Year"
+    },
+    "which-radio": {
+      "summary": "Which Radio",
+      "options": {
+        "recorded": {
+          "label": "Recorded Delivery"
+        }
+      }
+    }
+  },
+  "pages": {
+    "enquiry-details": {
+      "summary": "Enquiry Details"
+    },
+    "order-details": {
+      "summary": "Order Details"
+    },
+    "contact-details": {
+      "summary": "Contact Details"
+    }
+  }
+}
