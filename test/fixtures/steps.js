@@ -130,7 +130,8 @@ module.exports = {
   },
   '/address': {
     fields: [
-      'address-textarea'
+      'address-textarea',
+      'which-checkbox'
     ],
     locals: {
       section: 'contact-details',

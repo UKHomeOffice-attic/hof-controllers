@@ -144,6 +144,12 @@ module.exports = [
         label: 'Address Textarea',
         step: '/address',
         value: '123 Example Street, Croydon'
+      },
+      {
+        field: 'which-checkbox',
+        label: 'Which Checkbox',
+        step: '/address',
+        value: 'First value\nSecond value'
       }
     ],
     section: 'Contact Details'

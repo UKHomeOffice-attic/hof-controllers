@@ -29,5 +29,6 @@ module.exports = {
   'when-date-day': '01',
   'when-date-month': '01',
   'when-date-year': '2001',
-  'which-radio': 'recorded'
+  'which-radio': 'recorded',
+  'which-checkbox': ['value-one', 'value-two']
 };
