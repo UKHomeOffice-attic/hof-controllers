@@ -112,6 +112,17 @@
           "label": "Recorded Delivery"
         }
       }
+    },
+    "which-checkbox": {
+      "legend": "Which Checkbox",
+      "options": {
+        "value-one": {
+          "label": "First value"
+        },
+        "value-two": {
+          "label": "Second value"
+        }
+      }
     }
   },
   "pages": {

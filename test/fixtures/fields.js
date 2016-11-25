@@ -50,5 +50,12 @@ module.exports = {
   },
   'which-radio': {
     mixin: 'radio-group'
+  },
+  'which-checkbox': {
+    mixin: 'checkbox-group',
+    options: [
+      'value-one',
+      'value-two'
+    ]
   }
 };
