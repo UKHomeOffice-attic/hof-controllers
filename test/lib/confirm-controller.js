@@ -336,6 +336,7 @@ describe('Confirm Controller', () => {
         it('extends the config from step with translated values', () => {
           confirmController.getEmailerConfig(req).should.be.deep.equal({
             port: '',
+            includeInEmail: true,
             data: {
               a: 'value'
             },
