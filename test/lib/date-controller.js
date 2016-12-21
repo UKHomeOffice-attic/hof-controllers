@@ -202,6 +202,31 @@ describe('lib/date-controller', () => {
     });
   });
 
+  describe('validateDateField', () => {
+    beforeEach(() => {
+      sinon.stub(DateController.prototype, 'getValidatorTypes').returns([]);
+    });
+
+    afterEach(() => {
+      DateController.prototype.getValidatorTypes.restore();
+    });
+
+    it('returns if the field has a dependent which is not satisfied', () => {
+      const req = {
+        form: {
+          values: {
+            'dependent-field': 'dependent-value'
+          }
+        }
+      };
+      controller.options.fields.date.dependent = {
+        field: 'dependent-field',
+        value: 'dependent-value'
+      };
+      chai.expect(controller.validateDateField(req, 'date')).to.be.undefined;
+    });
+  });
+
   describe('.process()', () => {
     describe('with all date parts', () => {
       const req = {
