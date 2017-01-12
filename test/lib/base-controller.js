@@ -19,6 +19,7 @@ describe('lib/base-controller', () => {
       hofFormWizard.Controller = sinon.stub(hofFormWizard, 'Controller', function (options) {
         this.options = options;
       });
+      hofFormWizard.Controller.prototype.use = sinon.stub();
       hofFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
         'hof-form-wizard': hofFormWizard,
