@@ -137,9 +137,17 @@ describe('Confirm Controller', () => {
     });
 
     describe('public methods', () => {
-      let req = {};
+      let req = {
+        sessionModel: {}
+      };
       let res = {};
       let cb;
+
+      beforeEach(() => {
+        req.sessionModel.get = sinon.stub();
+        req.sessionModel.set = sinon.stub();
+      });
+
       describe('formatData', () => {
         let result;
         let translate;
@@ -260,9 +268,7 @@ describe('Confirm Controller', () => {
         };
 
         beforeEach(() => {
-          req.sessionModel = {
-            toJSON: sinon.stub().returns(data)
-          };
+          req.sessionModel.toJSON = sinon.stub().returns(data);
           req.translate = {};
           sinon.stub(ConfirmController.prototype, 'formatData');
         });
@@ -271,12 +277,12 @@ describe('Confirm Controller', () => {
           ConfirmController.prototype.formatData.restore();
         });
 
-        it('saves the return value of formatData to the instance', () => {
+        it('saves the return value of formatData to the sessionModel', () => {
           const result = {a: 'value'};
           ConfirmController.prototype.formatData.returns(result);
           confirmController.get(req, res, cb);
-          confirmController.formattedData.should.be.ok
-            .and.be.equal(result);
+          req.sessionModel.set.should.have.been.calledOnce
+            .and.calledWithExactly('formattedData', result);
         });
 
         it('calls formatData with the data and translate function', () => {
@@ -300,7 +306,7 @@ describe('Confirm Controller', () => {
         });
 
         it('extends super.locals with rows', () => {
-          confirmController.formattedData = [{a: 'value'}, {b: 'another value'}];
+          req.sessionModel.get.withArgs('formattedData').returns([{a: 'value'}, {b: 'another value'}]);
           StubController.prototype.locals.returns({root: 'value'});
           confirmController.locals(req, res).should.be.deep.equal({
             root: 'value',
@@ -322,9 +328,9 @@ describe('Confirm Controller', () => {
               port: ''
             }
           };
-          confirmController.formattedData = {
+          req.sessionModel.get.withArgs('formattedData').returns({
             a: 'value'
-          };
+          });
           helpersStub.conditionalTranslate
             .onCall(0).returns('subject')
             .onCall(1).returns('customer-intro')
