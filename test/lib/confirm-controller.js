@@ -110,10 +110,6 @@ describe('Confirm Controller', () => {
       ConfirmController.prototype.should.haveOwnProperty('formatData');
     });
 
-    it('has a get method', () => {
-      ConfirmController.prototype.should.haveOwnProperty('get');
-    });
-
     it('has a locals method', () => {
       ConfirmController.prototype.should.haveOwnProperty('locals');
     });
@@ -145,7 +141,7 @@ describe('Confirm Controller', () => {
 
       beforeEach(() => {
         req.sessionModel.get = sinon.stub();
-        req.sessionModel.set = sinon.stub();
+        req.sessionModel.toJSON = sinon.stub();
       });
 
       describe('formatData', () => {
@@ -262,14 +258,8 @@ describe('Confirm Controller', () => {
         });
       });
 
-      describe('get', () => {
-        const data = {
-          a: 'value'
-        };
-
+      describe('locals', () => {
         beforeEach(() => {
-          req.sessionModel.toJSON = sinon.stub().returns(data);
-          req.translate = {};
           sinon.stub(ConfirmController.prototype, 'formatData');
         });
 
@@ -277,28 +267,6 @@ describe('Confirm Controller', () => {
           ConfirmController.prototype.formatData.restore();
         });
 
-        it('saves the return value of formatData to the sessionModel', () => {
-          const result = {a: 'value'};
-          ConfirmController.prototype.formatData.returns(result);
-          confirmController.get(req, res, cb);
-          req.sessionModel.set.should.have.been.calledOnce
-            .and.calledWithExactly('formattedData', result);
-        });
-
-        it('calls formatData with the data and translate function', () => {
-          confirmController.get(req, res, cb);
-          ConfirmController.prototype.formatData.should.have.been.calledOnce
-            .and.calledWithExactly(data, req.translate);
-        });
-
-        it('calls super', () => {
-          confirmController.get(req, res, cb);
-          StubController.prototype.get.should.have.been.calledOnce
-            .and.calledWithExactly(req, res, cb);
-        });
-      });
-
-      describe('locals', () => {
         it('calls super', () => {
           confirmController.locals(req, res);
           StubController.prototype.locals.should.have.been.calledOnce
@@ -306,7 +274,7 @@ describe('Confirm Controller', () => {
         });
 
         it('extends super.locals with rows', () => {
-          req.sessionModel.get.withArgs('formattedData').returns([{a: 'value'}, {b: 'another value'}]);
+          ConfirmController.prototype.formatData.returns([{a: 'value'}, {b: 'another value'}]);
           StubController.prototype.locals.returns({root: 'value'});
           confirmController.locals(req, res).should.be.deep.equal({
             root: 'value',
@@ -328,7 +296,7 @@ describe('Confirm Controller', () => {
               port: ''
             }
           };
-          req.sessionModel.get.withArgs('formattedData').returns({
+          sinon.stub(ConfirmController.prototype, 'formatData').returns({
             a: 'value'
           });
           helpersStub.conditionalTranslate
@@ -337,6 +305,10 @@ describe('Confirm Controller', () => {
             .onCall(2).returns('caseworker-intro')
             .onCall(3).returns('customer-outro')
             .onCall(4).returns('caseworker-outro');
+        });
+
+        afterEach(() => {
+          ConfirmController.prototype.formatData.restore();
         });
 
         it('extends the config from step with translated values', () => {
