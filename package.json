@@ -16,8 +16,9 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
-    "hof-form-wizard": "^1.0.2",
     "hof-emailer": "^1.0.0",
+    "hof-form-controller": "^2.0.0",
+    "hogan.js": "^3.0.2",
     "i18n-lookup": "^0.1.0",
     "lodash": "4.16.3",
     "moment": "2.15.1",
@@ -31,6 +32,7 @@
     "eslint-plugin-filenames": "^0.1.1",
     "eslint-plugin-mocha": "^0.2.2",
     "eslint-plugin-one-variable-per-var": "0.0.3",
+    "hof-model": "^2.0.0",
     "i18n-future": "^1.0.0",
     "jscs": "^1.13.1",
     "mocha": "^2.2.5",
@@ -38,6 +40,7 @@
     "mocha-multi": "^0.7.1",
     "pre-commit": "^1.0.10",
     "proxyquire": "^1.5.0",
+    "reqres": "^1.2.2",
     "sinomocha": "^0.2.4",
     "sinon": "^1.15.3",
     "sinon-chai": "^2.8.0"

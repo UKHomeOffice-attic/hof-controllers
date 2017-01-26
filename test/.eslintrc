@@ -4,3 +4,7 @@ extends:
 
 env:
   es6: true
+
+rules:
+  no-underscore-dangle: 0
+  space-in-brackets: 0
