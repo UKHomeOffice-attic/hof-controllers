@@ -1,6 +1,6 @@
 # Change log
 
-## v6.0.0 - 2016-01-26
+## v6.0.0 - 2017-01-26
 
 * Uses v2.0.0 of hof-form-controller
 * Uses dynamic config options from `req.form.options` in favour of `this.options` as introduced in v.2.0.0 of hof-form-controller
