@@ -11,7 +11,7 @@ const DateController = proxyquire('../../lib/date-controller', {
   './base-controller': Controller
 });
 
-const ErrorClass = require('../../lib/error-controller');
+const ErrorClass = require('../../lib/error');
 
 describe('lib/date-controller', () => {
 
