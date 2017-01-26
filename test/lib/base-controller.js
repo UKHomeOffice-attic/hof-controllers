@@ -19,12 +19,17 @@ describe('lib/base-controller', () => {
       hofFormWizard.Controller = sinon.stub(hofFormWizard, 'Controller', function (options) {
         this.options = options;
       });
-      hofFormWizard.Controller.prototype.use = sinon.stub();
-      hofFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
       Controller = proxyquire('../../lib/base-controller', {
         'hof-form-wizard': hofFormWizard,
         './middleware/mixins': {}
       });
+      Controller.prototype.use = sinon.stub();
+      sinon.spy(Controller.prototype, 'applyComponents');
+    });
+
+    afterEach(() => {
+      Controller.prototype.applyComponents.restore();
+      hofFormWizard.Controller.restore();
     });
 
     it('calls the parent constructor', () => {
@@ -32,6 +37,14 @@ describe('lib/base-controller', () => {
         template: 'foo'
       });
       hofFormWizard.Controller.should.have.been.called;
+    });
+
+    it('calls applyComponents', () => {
+      controller = new Controller({
+        template: 'foo'
+      });
+      Controller.prototype.applyComponents.should.have.been.calledOnce
+        .and.calledWithExactly();
     });
 
   });
@@ -45,6 +58,39 @@ describe('lib/base-controller', () => {
         'i18n-lookup': function() {
           return function () {};
         }
+      });
+    });
+
+    describe('.applyComponents()', () => {
+      let fields;
+      let componentStub;
+      let requestHandlerStub;
+      beforeEach(() => {
+        requestHandlerStub = sinon.stub().returns(true);
+        componentStub = sinon.stub().returns({
+          requestHandler: requestHandlerStub
+        });
+        fields = {
+          'a-field': {
+            mixin: 'input-text'
+          },
+          'component-field': {
+            component: componentStub
+          }
+        };
+        controller.use = sinon.stub();
+        controller.options.fields = fields;
+        controller.applyComponents();
+      });
+
+      it('should have called componentStub with the config from component-field', () => {
+        componentStub.should.have.been.calledOnce.and.calledWithMatch(Object.assign({}, fields['component-field'], {
+          key: 'component-field'
+        }));
+      });
+
+      it('should have called use with the result of requestHandler', () => {
+        controller.use.should.have.been.calledOnce.and.calledWithExactly(requestHandlerStub());
       });
     });
 
@@ -140,6 +186,40 @@ describe('lib/base-controller', () => {
       });
     });
 
+    describe('.getErrors()', () => {
+      let errs;
+      let componentErrs;
+      let req = {
+        sessionModel: {}
+      };
+      let res = {};
+
+      beforeEach(() => {
+        errs = {
+          'field-1': {
+            type: 'required'
+          }
+        };
+        componentErrs = {
+          'component': {
+            type: 'future'
+          }
+        };
+        req.sessionModel.get = sinon.stub().returns(componentErrs);
+        hofFormWizard.Controller.prototype.getErrors = sinon.stub().returns(errs);
+      });
+
+      it('calls super', () => {
+        controller.getErrors(req, res);
+        hofFormWizard.Controller.prototype.getErrors.should.have.been.calledOnce
+          .and.calledWithExactly(req, res);
+      });
+
+      it('extends standard errors with errors from components', () => {
+        controller.getErrors(req, res).should.be.deep.equal(Object.assign({}, errs, componentErrs));
+      });
+    });
+
     describe('.locals()', () => {
 
       const req = {
@@ -148,6 +228,7 @@ describe('lib/base-controller', () => {
       const res = {};
 
       beforeEach(() => {
+        hofFormWizard.Controller.prototype.locals = sinon.stub().returns({foo: 'bar'});
         sinon.stub(Controller.prototype, 'getBackLink');
         sinon.stub(Controller.prototype, 'getErrorLength');
         Controller.prototype.getErrorLength.returns({single: true});
@@ -189,6 +270,9 @@ describe('lib/base-controller', () => {
       describe('with fields', () => {
         let locals;
         beforeEach(() => {
+          res.locals = {
+            'another-field': '<h1>hi</h1>'
+          };
           controller.options.fields = {
             'a-field': {
               mixin: 'input-text'
@@ -214,6 +298,10 @@ describe('lib/base-controller', () => {
 
         it('should have added \'input-text\' as \'mixin\' property to the first object', () => {
           locals.fields[0].mixin.should.be.equal('input-text');
+        });
+
+        it('should have added a html propety to \'another-field\' with the value taken from res.locals', () => {
+          locals.fields[1].html.should.be.equal('<h1>hi</h1>');
         });
       });
 
