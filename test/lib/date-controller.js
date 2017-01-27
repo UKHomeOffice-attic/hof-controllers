@@ -128,27 +128,11 @@ describe('lib/date-controller', () => {
 
     describe('when the date is not required', () => {
 
-      describe('required error', () => {
-
-        it('does not return an error when the field is undefined', () => {
-          req.form.values.date = undefined;
-
-          should.equal(controller.validateField('date', req, false), undefined);
-        });
-
-        it('does not return an error when the field is an empty string', () => {
-          req.form.values.date = '';
-
-          should.equal(controller.validateField('date', req, false), undefined);
-        });
-
-      });
-
       describe('numeric error', () => {
 
         it('returns an error class when the field is not numeric', () => {
           req.form.values.date = 'ab-cd-efgh';
-          const numericCheck = controller.validateField('date', req, false);
+          const numericCheck = controller.validateField('date', req);
 
           numericCheck.should.be.an.instanceof(ErrorClass);
           numericCheck.should.have.property('key').and.equal('date');
