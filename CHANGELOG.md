@@ -1,5 +1,9 @@
 # Change log
 
+## v6.0.1 - 2017-01-31
+
+* Uses dynamic field configuration to whitelist error messages
+
 ## v6.0.0 - 2017-01-26
 
 * Uses v2.0.0 of hof-form-controller
