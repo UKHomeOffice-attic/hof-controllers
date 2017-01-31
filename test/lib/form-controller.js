@@ -13,7 +13,7 @@ describe('Form Controller', () => {
   let res;
   let next;
 
-  beforeEach(() => {
+  beforeEach((done) => {
     req = request({
         sessionModel: new Model()
     });
@@ -26,6 +26,7 @@ describe('Form Controller', () => {
         field2: {}
       }
     });
+    controller._configure(req, res, done);
   });
 
   describe('validators', () => {
@@ -68,6 +69,16 @@ describe('Form Controller', () => {
       });
       const errors = controller.getErrors(req, res);
       errors.should.eql({ field2: { message: 'message' } });
+    });
+
+    it('includes errors on dynamically created fields', () => {
+      req.sessionModel.set('errors', {
+        field1: 'foo',
+        field3: 'bar'
+      });
+      req.form.options.fields.field3 = {};
+      const errors = controller.getErrors(req, res);
+      errors.should.eql({ field1: 'foo', field3: 'bar' });
     });
   });
 
