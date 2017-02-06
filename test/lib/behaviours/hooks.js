@@ -3,6 +3,15 @@
 const proxyquire = require('proxyquire');
 const reqres = require('reqres');
 const _ = require('lodash');
+const HooksBehaviour = proxyquire('../../../lib/behaviours/hooks', {
+  express: {
+    Router: () => ({
+      use: middleware => ({
+        handle: (req, res, next) => middleware.forEach(arg => arg(req, res, next))
+      })
+    })
+  }
+});
 
 const testHooksCalled = (fields, hookName, controller) => {
   fields.forEach(field => {
@@ -29,43 +38,34 @@ describe('Run Hooks', () => {
     'saveValues',
     'successHandler'
   ];
-  let Controller;
-  class BaseControllerStub {}
+  let Hooks;
+  class Controller {}
 
   beforeEach(() => {
     methodNames.forEach(method => {
-      BaseControllerStub.prototype[method] = sinon.stub().yields(2);
+      Controller.prototype[method] = sinon.stub().yields(2);
     });
-    Controller = proxyquire('../../../lib/core/run-hooks', {
-      './session-io': BaseControllerStub,
-      express: {
-        Router: () => ({
-          use: middleware => ({
-            handle: (req, res, next) => middleware.forEach(arg => arg(req, res, next))
-          })
-        })
-      }
-    });
+    Hooks = HooksBehaviour(Controller);
   });
 
   it('has a runHooks method', () => {
-    Controller.prototype.should.have.property('runHooks').that.is.a('function');
+    Hooks.prototype.should.have.property('runHooks').that.is.a('function');
   });
 
   it('extends the get and post pipeline methods', () => {
     methodNames.forEach(name => {
-      Controller.prototype.should.have.ownProperty(name);
+      Hooks.prototype.should.have.ownProperty(name);
     });
   });
 
   describe('instance', () => {
-    let controller;
+    let hooks;
     let req;
     let res;
     let next;
 
     beforeEach(() => {
-      controller = new Controller();
+      hooks = new Hooks();
       req = reqres.req();
       res = reqres.res();
       next = () => {};
@@ -73,21 +73,21 @@ describe('Run Hooks', () => {
 
     describe('running hooks', () => {
       beforeEach(function() {
-        this.stub(Controller.prototype, 'runHooks').returns(sinon.stub().yields(2));
+        this.stub(Hooks.prototype, 'runHooks').returns(sinon.stub().yields(2));
       });
 
       it('calls runHooks with the correct hook before and after each pipeline method', () => {
         const getHookName = name => name.replace(/^_/, '');
         methodNames.forEach(name => {
           const hookName = getHookName(name);
-          controller[name](req, res, next);
+          hooks[name](req, res, next);
 
-          Controller.prototype.runHooks.should.have.been.calledTwice
+          Hooks.prototype.runHooks.should.have.been.calledTwice
             .and.calledWith(`pre-${hookName}`)
             .and.calledWith(`post-${hookName}`);
 
-          Controller.prototype.runHooks.restore();
-          sinon.stub(Controller.prototype, 'runHooks').returns(sinon.stub().yields(2));
+          Hooks.prototype.runHooks.restore();
+          sinon.stub(Hooks.prototype, 'runHooks').returns(sinon.stub().yields(2));
         });
       });
     });
@@ -95,7 +95,7 @@ describe('Run Hooks', () => {
     describe('runHooks()', () => {
       beforeEach(() => {
         const getMiddlewareStub = () => sinon.stub().returns(sinon.stub().yields(2));
-        controller.options = {
+        hooks.options = {
           fields: {
             'field-1': {
               hooks: {
@@ -124,36 +124,36 @@ describe('Run Hooks', () => {
       it('calls pre-getErrors hooks', () => {
         const fields = ['field-1', 'field-2', 'field-3'];
         const hookName = 'pre-getErrors';
-        controller.runHooks(hookName)(req, res, next);
-        testHooksCalled(fields, hookName, controller);
+        hooks.runHooks(hookName)(req, res, next);
+        testHooksCalled(fields, hookName, hooks);
       });
 
       it('calls post-getErrors hooks', () => {
         const fields = ['field-1'];
         const hookName = 'post-getErrors';
-        controller.runHooks(hookName)(req, res, next);
-        testHooksCalled(fields, hookName, controller);
+        hooks.runHooks(hookName)(req, res, next);
+        testHooksCalled(fields, hookName, hooks);
       });
 
       it('calls pre-render hooks', () => {
         const fields = ['field-2', 'field-3'];
         const hookName = 'pre-render';
-        controller.runHooks(hookName)(req, res, next);
-        testHooksCalled(fields, hookName, controller);
+        hooks.runHooks(hookName)(req, res, next);
+        testHooksCalled(fields, hookName, hooks);
       });
 
       it('calls post-process hooks', () => {
         const fields = ['field-2'];
         const hookName = 'post-process';
-        controller.runHooks(hookName)(req, res, next);
-        testHooksCalled(fields, hookName, controller);
+        hooks.runHooks(hookName)(req, res, next);
+        testHooksCalled(fields, hookName, hooks);
       });
 
       it('calls post-render hooks', () => {
         const fields = ['field-3'];
         const hookName = 'post-render';
-        controller.runHooks(hookName)(req, res, next);
-        testHooksCalled(fields, hookName, controller);
+        hooks.runHooks(hookName)(req, res, next);
+        testHooksCalled(fields, hookName, hooks);
       });
     });
   });

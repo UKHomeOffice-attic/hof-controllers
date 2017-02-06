@@ -5,7 +5,8 @@ const response = require('reqres').res;
 const request = require('reqres').req;
 const proxyquire = require('proxyquire');
 
-let BaseController = require('../../lib/core/run-hooks');
+let BaseController = require('hof-form-controller');
+const SessionsBehaviour = require('../../lib/behaviours/sessions')(BaseController);
 
 describe('lib/base-controller', () => {
 
@@ -14,7 +15,9 @@ describe('lib/base-controller', () => {
 
   beforeEach(() => {
     Controller = proxyquire('../../lib/base-controller', {
-      './middleware/mixins': {}
+      './middleware/mixins': {},
+      './behaviours/sessions': () => SessionsBehaviour,
+      'hof-form-controller': BaseController
     });
     sinon.stub(BaseController.prototype, 'use');
     sinon.stub(BaseController.prototype, 'locals').returns({foo: 'bar'});
@@ -23,26 +26,6 @@ describe('lib/base-controller', () => {
   afterEach(() => {
     BaseController.prototype.use.restore();
     BaseController.prototype.locals.restore();
-  });
-
-  describe('constructor', () => {
-
-    beforeEach(() => {
-      BaseController = sinon.spy(BaseController);
-    });
-
-    it('calls the parent constructor', () => {
-      const stub = sinon.stub();
-      Controller = proxyquire('../../lib/base-controller', {
-        './core/run-hooks': stub,
-        './middleware/mixins': {}
-      });
-      controller = new Controller({
-        template: 'foo'
-      });
-      stub.should.have.been.calledWithExactly({template: 'foo'});
-    });
-
   });
 
   describe('methods', () => {
@@ -271,11 +254,13 @@ describe('lib/base-controller', () => {
       let callback;
 
       beforeEach(() => {
-        sinon.stub(BaseController.prototype, 'getValues').yields();
+        sinon.stub(SessionsBehaviour.prototype, 'getValues').yields();
         Controller.prototype.getErrorLength = sinon.stub();
         req = {
           sessionModel: {
-            reset: sinon.stub()
+            reset: sinon.stub(),
+            toJSON: sinon.stub().returns({}),
+            get: sinon.stub().returns({})
           },
           header: sinon.stub()
         };
@@ -283,7 +268,7 @@ describe('lib/base-controller', () => {
       });
 
       afterEach(() => {
-        BaseController.prototype.getValues.restore();
+        SessionsBehaviour.prototype.getValues.restore();
       });
 
       describe('when there\'s a next step', () => {
@@ -365,7 +350,7 @@ describe('lib/base-controller', () => {
 
         beforeEach((done) => {
           error = 'Parent getValues error.';
-          BaseController.prototype.getValues.yields(error);
+          SessionsBehaviour.prototype.getValues.yields(error);
           controller = new Controller({template: 'foo'});
           controller.options = {
             clearSession: true
@@ -386,7 +371,7 @@ describe('lib/base-controller', () => {
         controller.options = {};
         controller._configure(req, res, () => {});
         controller.getValues(req, res, callback);
-        BaseController.prototype.getValues
+        SessionsBehaviour.prototype.getValues
           .should.always.have.been.calledWith(req, res);
       });
 
