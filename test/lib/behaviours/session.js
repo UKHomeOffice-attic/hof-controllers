@@ -1,49 +1,50 @@
 'use strict';
 
-const Controller = require('../../lib/form-controller');
-const ErrorClass = require('../../lib/error');
-const Form = require('hof-form-controller');
+const SessionsBehaviour = require('../../../lib/behaviours/sessions');
+const ErrorClass = require('../../../lib/error');
+const Controller = require('hof-form-controller');
 const Model = require('hof-model');
 const request = require('reqres').req;
 const response = require('reqres').res;
+const Sessions = SessionsBehaviour(Controller);
 
-describe('Form Controller', () => {
-  let controller;
+describe('Sessions Behaviour', () => {
+  let sessions;
   let req;
   let res;
   let next;
 
-  beforeEach((done) => {
+  beforeEach(done => {
     req = request({
         sessionModel: new Model()
     });
     res = response();
     next = sinon.stub();
-    controller = new Controller({
+    sessions = new Sessions({
       template: 'index',
       fields: {
         field1: {},
         field2: {}
       }
     });
-    controller._configure(req, res, done);
+    sessions._configure(req, res, done);
   });
 
   describe('validators', () => {
     it('exposes validators', () => {
-      Controller.validators.should.eql(Form.validators);
+      Sessions.validators.should.eql(Controller.validators);
     });
   });
 
   describe('formatters', () => {
     it('exposes formatters', () => {
-      Controller.formatters.should.eql(Form.formatters);
+      Sessions.formatters.should.eql(Controller.formatters);
     });
   });
 
   describe('Error', () => {
     it('is an instance of Wizard.Error', () => {
-      const err = new controller.Error('key', { type: 'required' });
+      const err = new sessions.Error('key', { type: 'required' });
       err.should.be.an.instanceOf(ErrorClass);
     });
   });
@@ -54,7 +55,7 @@ describe('Form Controller', () => {
         field1: 'foo',
         field3: 'bar'
       });
-      const errors = controller.getErrors(req, res);
+      const errors = sessions.getErrors(req, res);
       errors.should.eql({ field1: 'foo' });
     });
 
@@ -67,7 +68,7 @@ describe('Form Controller', () => {
           message: 'message'
         }
       });
-      const errors = controller.getErrors(req, res);
+      const errors = sessions.getErrors(req, res);
       errors.should.eql({ field2: { message: 'message' } });
     });
 
@@ -77,40 +78,40 @@ describe('Form Controller', () => {
         field3: 'bar'
       });
       req.form.options.fields.field3 = {};
-      const errors = controller.getErrors(req, res);
+      const errors = sessions.getErrors(req, res);
       errors.should.eql({ field1: 'foo', field3: 'bar' });
     });
   });
 
   describe('errorHandler', () => {
     beforeEach(() => {
-      sinon.stub(Form.prototype, 'errorHandler');
-      sinon.stub(Controller.prototype, 'missingPrereqHandler');
+      sinon.stub(Controller.prototype, 'errorHandler');
+      sinon.stub(Sessions.prototype, 'missingPrereqHandler');
     });
 
     afterEach(() => {
-      Form.prototype.errorHandler.restore();
-      Controller.prototype.missingPrereqHandler.restore();
+      Controller.prototype.errorHandler.restore();
+      Sessions.prototype.missingPrereqHandler.restore();
     });
 
     it('calls missingPrereqHandler for missing prerquisite errors', () => {
       const err = new Error('foo');
       err.code = 'MISSING_PREREQ';
-      controller.errorHandler(err, req, res, next);
-      controller.missingPrereqHandler.should.have.been.calledWithExactly(req, res, next);
+      sessions.errorHandler(err, req, res, next);
+      sessions.missingPrereqHandler.should.have.been.calledWithExactly(req, res, next);
     });
 
     it('passes through to parent errorHandler for all other errors', () => {
       const err = new Error('foo');
-      controller.errorHandler(err, req, res, next);
-      Form.prototype.errorHandler.should.have.been.calledWithExactly(err, req, res, next);
-      Form.prototype.errorHandler.should.have.been.calledOn(controller);
+      sessions.errorHandler(err, req, res, next);
+      Controller.prototype.errorHandler.should.have.been.calledWithExactly(err, req, res, next);
+      Controller.prototype.errorHandler.should.have.been.calledOn(sessions);
     });
   });
 
   describe('missingPrereqHandler', () => {
     beforeEach(() => {
-      controller.options.steps = {
+      sessions.options.steps = {
         '/one': { next: '/two' },
         '/two': { next: '/three' },
         '/three': { next: '/four' },
@@ -120,13 +121,13 @@ describe('Form Controller', () => {
 
     it('redirects to the step following the most recently completed', () => {
       req.sessionModel.set('steps', ['/one']);
-      controller.missingPrereqHandler(req, res, next);
+      sessions.missingPrereqHandler(req, res, next);
       res.redirect.should.have.been.calledWith('/two');
     });
 
     it('redirects to the first step if no steps have been completed', () => {
       req.sessionModel.set('steps', []);
-      controller.missingPrereqHandler(req, res, next);
+      sessions.missingPrereqHandler(req, res, next);
       res.redirect.should.have.been.calledWith('/one');
     });
   });

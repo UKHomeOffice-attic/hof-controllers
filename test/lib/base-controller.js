@@ -5,7 +5,8 @@ const response = require('reqres').res;
 const request = require('reqres').req;
 const proxyquire = require('proxyquire');
 
-let FormController = require('../../lib/form-controller');
+let BaseController = require('hof-form-controller');
+const SessionsBehaviour = require('../../lib/behaviours/sessions')(BaseController);
 
 describe('lib/base-controller', () => {
 
@@ -14,45 +15,27 @@ describe('lib/base-controller', () => {
 
   beforeEach(() => {
     Controller = proxyquire('../../lib/base-controller', {
-      './middleware/mixins': {}
+      './middleware/mixins': {},
+      './behaviours/sessions': () => SessionsBehaviour,
+      'hof-form-controller': BaseController
     });
-    sinon.stub(FormController.prototype, 'use');
-    sinon.stub(FormController.prototype, 'locals').returns({foo: 'bar'});
+    sinon.stub(BaseController.prototype, 'use');
+    sinon.stub(BaseController.prototype, 'locals').returns({foo: 'bar'});
   });
 
   afterEach(() => {
-    FormController.prototype.use.restore();
-    FormController.prototype.locals.restore();
-  });
-
-  describe('constructor', () => {
-
-    beforeEach(() => {
-      FormController = sinon.spy(FormController);
-    });
-
-    it('calls the parent constructor', () => {
-      const stub = sinon.stub();
-      Controller = proxyquire('../../lib/base-controller', {
-        './form-controller': stub,
-        './middleware/mixins': {}
-      });
-      controller = new Controller({
-        template: 'foo'
-      });
-      stub.should.have.been.calledWithExactly({template: 'foo'});
-    });
-
+    BaseController.prototype.use.restore();
+    BaseController.prototype.locals.restore();
   });
 
   describe('methods', () => {
 
     beforeEach(() => {
-      sinon.stub(FormController.prototype, 'getNextStep');
+      sinon.stub(BaseController.prototype, 'getNextStep');
     });
 
     afterEach(() => {
-      FormController.prototype.getNextStep.restore();
+      BaseController.prototype.getNextStep.restore();
     });
 
     describe('.get()', () => {
@@ -61,7 +44,7 @@ describe('lib/base-controller', () => {
       let res;
 
       beforeEach(() => {
-        sinon.stub(FormController.prototype, 'get');
+        sinon.stub(BaseController.prototype, 'get');
         controller = new Controller({
           template: 'foo'
         });
@@ -75,12 +58,12 @@ describe('lib/base-controller', () => {
       });
 
       afterEach(() => {
-        FormController.prototype.get.restore();
+        BaseController.prototype.get.restore();
       });
 
       it('calls super', () => {
         controller.get(req, res, _.noop);
-        FormController.prototype.get.should.have.been.calledOnce
+        BaseController.prototype.get.should.have.been.calledOnce
           .and.calledWithExactly(req, res, _.noop);
       });
 
@@ -271,11 +254,13 @@ describe('lib/base-controller', () => {
       let callback;
 
       beforeEach(() => {
-        sinon.stub(FormController.prototype, 'getValues').yields();
+        sinon.stub(SessionsBehaviour.prototype, 'getValues').yields();
         Controller.prototype.getErrorLength = sinon.stub();
         req = {
           sessionModel: {
-            reset: sinon.stub()
+            reset: sinon.stub(),
+            toJSON: sinon.stub().returns({}),
+            get: sinon.stub().returns({})
           },
           header: sinon.stub()
         };
@@ -283,7 +268,7 @@ describe('lib/base-controller', () => {
       });
 
       afterEach(() => {
-        FormController.prototype.getValues.restore();
+        SessionsBehaviour.prototype.getValues.restore();
       });
 
       describe('when there\'s a next step', () => {
@@ -365,7 +350,7 @@ describe('lib/base-controller', () => {
 
         beforeEach((done) => {
           error = 'Parent getValues error.';
-          FormController.prototype.getValues.yields(error);
+          SessionsBehaviour.prototype.getValues.yields(error);
           controller = new Controller({template: 'foo'});
           controller.options = {
             clearSession: true
@@ -386,7 +371,7 @@ describe('lib/base-controller', () => {
         controller.options = {};
         controller._configure(req, res, () => {});
         controller.getValues(req, res, callback);
-        FormController.prototype.getValues
+        SessionsBehaviour.prototype.getValues
           .should.always.have.been.calledWith(req, res);
       });
 
@@ -407,7 +392,7 @@ describe('lib/base-controller', () => {
           get: getStub
         };
         controller = new Controller({template: 'foo'});
-        FormController.prototype.getNextStep.returns('/');
+        BaseController.prototype.getNextStep.returns('/');
         controller._configure(req, res, done);
       });
 
@@ -429,7 +414,7 @@ describe('lib/base-controller', () => {
 
       describe('when the action is "edit" and continueOnEdit is truthy', () => {
         it('appends "/edit" to the path if next page is not /confirm', () => {
-          FormController.prototype.getNextStep.returns('/step');
+          BaseController.prototype.getNextStep.returns('/step');
           req.form.options.continueOnEdit = true;
           req.params.action = 'edit';
           getStub.returns(['/step']);
@@ -437,7 +422,7 @@ describe('lib/base-controller', () => {
         });
 
         it('doesn\'t append "/edit" to the path if next page is /confirm', () => {
-          FormController.prototype.getNextStep.returns('/confirm');
+          BaseController.prototype.getNextStep.returns('/confirm');
           req.form.options.continueOnEdit = true;
           req.params.action = 'edit';
           controller.getNextStep(req).should.not.contain('/edit');
@@ -452,7 +437,7 @@ describe('lib/base-controller', () => {
             get: getStub
           };
           req.form.values = {};
-          FormController.prototype.getNextStep.returns('/next-page');
+          BaseController.prototype.getNextStep.returns('/next-page');
         });
 
         describe('when the condition config is met', () => {
@@ -689,14 +674,14 @@ describe('lib/base-controller', () => {
       const err = {};
 
       beforeEach((done) => {
-        sinon.stub(FormController.prototype, 'getErrorStep').returns('/');
+        sinon.stub(BaseController.prototype, 'getErrorStep').returns('/');
         req.params = {};
         controller = new Controller({template: 'foo'});
         controller._configure(req, res, done);
       });
 
       afterEach(() => {
-        FormController.prototype.getErrorStep.restore();
+        BaseController.prototype.getErrorStep.restore();
       });
 
       describe('when the action is "edit" and the parent redirect is not edit', () => {
@@ -707,7 +692,7 @@ describe('lib/base-controller', () => {
 
         it('doesn\'t append "edit" to the path if "edit" is already present', () => {
           req.params.action = 'edit';
-          FormController.prototype.getErrorStep.returns('/a-path/edit/id');
+          BaseController.prototype.getErrorStep.returns('/a-path/edit/id');
           controller.getErrorStep(err, req).should.not.match(/\/edit$/);
         });
       });

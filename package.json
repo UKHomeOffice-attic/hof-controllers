@@ -10,10 +10,9 @@
   "homepage": "https://github.com/UKHomeOffice/hof-controllers",
   "author": "HomeOffice",
   "scripts": {
-    "test": "NODE_ENV=test npm run lint && npm run style && npm run mocha",
+    "test": "NODE_ENV=test npm run lint && npm run mocha",
     "lint": "eslint .",
-    "mocha": "mocha",
-    "style": "jscs **/*.js --config=./.jscsrc.json"
+    "mocha": "mocha"
   },
   "dependencies": {
     "hof-emailer": "^1.0.0",
@@ -21,6 +20,7 @@
     "hogan.js": "^3.0.2",
     "i18n-lookup": "^0.1.0",
     "lodash": "4.16.3",
+    "mixwith": "^0.1.1",
     "moment": "2.15.1",
     "mustache": "^2.3.0"
   },
@@ -47,7 +47,6 @@
   },
   "pre-commit": [
     "lint",
-    "style",
     "test"
   ]
 }
