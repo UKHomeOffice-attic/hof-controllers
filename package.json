@@ -20,7 +20,7 @@
     "hof-form-controller": "^2.0.0",
     "hogan.js": "^3.0.2",
     "i18n-lookup": "^0.1.0",
-    "lodash": "4.16.3",
+    "lodash": "^4.16.3",
     "moment": "2.15.1",
     "mustache": "^2.3.0"
   },
