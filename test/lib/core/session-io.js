@@ -1,7 +1,7 @@
 'use strict';
 
-const Controller = require('../../lib/form-controller');
-const ErrorClass = require('../../lib/error');
+const Controller = require('../../../lib/core/session-io');
+const ErrorClass = require('../../../lib/error');
 const Form = require('hof-form-controller');
 const Model = require('hof-model');
 const request = require('reqres').req;
