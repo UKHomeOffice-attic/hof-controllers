@@ -16,6 +16,7 @@
     "style": "jscs **/*.js --config=./.jscsrc.json"
   },
   "dependencies": {
+    "deprecate": "^1.0.0",
     "hof-emailer": "^1.0.0",
     "hof-form-controller": "^2.0.0",
     "hogan.js": "^3.0.2",
