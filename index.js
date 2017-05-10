@@ -1,5 +1,9 @@
 'use strict';
 
+/* eslint-disable no-console */
+console.error('hof-controllers is now DEPRECATED please see the README.md for more info.');
+/* eslint-enable no-console */
+
 module.exports = {
   form: require('./lib/form-controller'),
   base: require('./lib/base-controller'),

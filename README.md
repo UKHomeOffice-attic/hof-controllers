@@ -1,5 +1,15 @@
 # hof-controllers [![npm version](https://badge.fury.io/js/hof-controllers.svg)](https://badge.fury.io/js/hof-controllers) [![Build Status](https://travis-ci.org/UKHomeOffice/hof-controllers.svg)](https://travis-ci.org/UKHomeOffice/hof-controllers)
 
+# DEPRECATION WARNING
+This module is now deprecated and has been superceded by the following modules:
+
+ * [hof-behaviour-summary-page](https://github.com/UKHomeOfficeForms/hof-behaviour-summary-page) replaces confirm-controller
+ * [hof-component-date](https://github.com/UKHomeOfficeForms/hof-component-date) replaces date-controller
+
+The form, base and start controllers have been removed and functionality has been moved back into [hof-form-wizard](https://github.com/UKHomeOfficeForms/hof-form-wizard).
+
+Please see [the hof guide](https://ukhomeofficeforms.github.io/hof-guide/documentation/) for more information.
+
 A collection of controllers extended from [passports-form-wizard](https://github.com/UKHomeOffice/passports-form-wizard) Wizard, Form Controller:
 ```js
 require('hmpo-form-wizard').Controller
